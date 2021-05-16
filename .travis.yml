@@ -1,0 +1,8 @@
+language: csharp
+mono: none
+dotnet: 2.1.505
+solution: CoreBoy.sln
+script:
+  - dotnet restore
+  - dotnet test
+  - dotnet build
