@@ -9,8 +9,10 @@ namespace CoreBoy.Test
         [TestMethod]
         public void LockedBits()
         {
-            MemoryCell memoryCell = new MemoryCell();
-            memoryCell.Value = 0xFF;
+            var memoryCell = new MemoryCell
+            {
+                Value = 0xFF
+            };
 
             Assert.AreEqual(0xFF, memoryCell.Value);
 

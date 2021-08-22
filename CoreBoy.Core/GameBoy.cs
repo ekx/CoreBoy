@@ -4,6 +4,7 @@ using CoreBoy.Core.Processors;
 using System;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using System.Diagnostics;
 using CoreBoy.Core.Utils;
 using Microsoft.Extensions.Logging;
 
@@ -11,21 +12,24 @@ namespace CoreBoy.Core
 {
     public class GameBoy
     {
+        public const uint ScreenWidth = 160;
+        public const uint ScreenHeight = 144;
+
         public event RenderFramebufferDelegate RenderFramebufferHandler
         {
-            add { ppu.RenderFramebufferHandler += value; }
-            remove { ppu.RenderFramebufferHandler -= value; }
+            add => ppu.RenderFramebufferHandler += value;
+            remove => ppu.RenderFramebufferHandler -= value;
         }
 
         public GameBoy(ILoggerFactory loggerFactory)
         {
-            this.log = loggerFactory.CreateLogger<GameBoy>();
+            log = loggerFactory.CreateLogger<GameBoy>();
             this.loggerFactory = loggerFactory;
 
-            this.ppu = new Ppu(loggerFactory.CreateLogger<Ppu>());
-            this.spu = new Spu(loggerFactory.CreateLogger<Spu>());
-            this.mmu = new Mmu(loggerFactory.CreateLogger<Mmu>(), ppu, spu);
-            this.cpu = new Cpu(loggerFactory.CreateLogger<Cpu>(), mmu);
+            ppu = new Ppu(loggerFactory.CreateLogger<Ppu>());
+            spu = new Spu(loggerFactory.CreateLogger<Spu>());
+            mmu = new Mmu(loggerFactory.CreateLogger<Mmu>(), ppu, spu);
+            cpu = new Cpu(loggerFactory.CreateLogger<Cpu>(), mmu);
         }
 
         public void Reset()
@@ -67,9 +71,10 @@ namespace CoreBoy.Core
 
         public void LoadCartridge(string path)
         {
-            byte[] data = File.ReadAllBytes(path);
+            var data = File.ReadAllBytes(path);
 
             ICartridge cartridge = null;
+            
             switch ((CartridgeType)data[0x0147])
             {
                 case CartridgeType.ROM:
@@ -99,41 +104,41 @@ namespace CoreBoy.Core
 
         public void SaveState()
         {
-            using (var stream = new FileStream("SaveState.xml", FileMode.Create))
+            using var stream = new FileStream("SaveState.xml", FileMode.Create);
+            
+            var serializer = new DataContractSerializer(typeof(SaveState), new List<Type> { typeof(RomCartridge) });
+            serializer.WriteObject(stream, new SaveState()
             {
-                var serializer = new DataContractSerializer(typeof(SaveState), new List<Type> { typeof(RomCartridge) });
-                serializer.WriteObject(stream, new SaveState()
-                {
-                    CpuState = cpu.State,
-                    MmuState = mmu.State,
-                    PpuState = ppu.State,
-                    SpuState = spu.State,
-                    CartridgeState = mmu.CartridgeState
-                });
-            }
+                CpuState = cpu.State,
+                MmuState = mmu.State,
+                PpuState = ppu.State,
+                SpuState = spu.State,
+                CartridgeState = mmu.CartridgeState
+            });
         }
 
         public void LoadState()
         {
-            using (var stream = new FileStream("SaveState.xml", FileMode.Open))
-            {
-                var serializer = new DataContractSerializer(typeof(SaveState), new List<Type> { typeof(RomCartridge) });
-                var saveState = (SaveState)serializer.ReadObject(stream);
+            using var stream = new FileStream("SaveState.xml", FileMode.Open);
+            
+            var serializer = new DataContractSerializer(typeof(SaveState), new List<Type> { typeof(RomCartridge) });
+            var saveState = (SaveState)serializer.ReadObject(stream);
 
-                cpu.State = saveState.CpuState;
-                mmu.State = saveState.MmuState;
-                ppu.State = saveState.PpuState;
-                spu.State = saveState.SpuState;
-                mmu.CartridgeState = saveState.CartridgeState;
-            }
+            if (saveState == null) return;
+            
+            cpu.State = saveState.CpuState;
+            mmu.State = saveState.MmuState;
+            ppu.State = saveState.PpuState;
+            spu.State = saveState.SpuState;
+            mmu.CartridgeState = saveState.CartridgeState;
         }
 
-        private bool shouldStop = false;
+        private bool shouldStop;
 
-        private ICpu cpu;
-        private IPpu ppu;
-        private ISpu spu;
-        private IMmu mmu;
+        private readonly ICpu cpu;
+        private readonly IPpu ppu;
+        private readonly ISpu spu;
+        private readonly IMmu mmu;
 
         private readonly ILogger log;
         private readonly ILoggerFactory loggerFactory;

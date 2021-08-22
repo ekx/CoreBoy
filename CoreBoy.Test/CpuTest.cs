@@ -161,7 +161,7 @@ namespace CoreBoy.Test
         }
 
         [TestMethod]
-        public void LoadSPIntoMemory()
+        public void LoadSpIntoMemory()
         {
             cpu.Reset();
             cpu.State.PC = 0x08;
@@ -176,7 +176,7 @@ namespace CoreBoy.Test
         }
 
         [TestMethod]
-        public void LoadSPIntoHL()
+        public void LoadSpIntoHl()
         {
             cpu.Reset();
             cpu.State.PC = 0xF8;
@@ -191,7 +191,7 @@ namespace CoreBoy.Test
         }
 
         [TestMethod]
-        public void LoadHLIntoSP()
+        public void LoadHlIntoSp()
         {
             cpu.Reset();
             cpu.State.PC = 0xF9;
@@ -991,7 +991,7 @@ namespace CoreBoy.Test
 
         #endregion
 
-        private Mock<IMmu> mmu;
-        private Cpu cpu;
+        private readonly Mock<IMmu> mmu;
+        private readonly Cpu cpu;
     }
 }
