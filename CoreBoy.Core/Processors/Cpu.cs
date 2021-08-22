@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CoreBoy.Core.Utils;
 using System.Runtime.Serialization;
 using Microsoft.Extensions.Logging;
@@ -22,7 +21,7 @@ namespace CoreBoy.Core.Processors
         {
             log.LogInformation("CPU reset");
 
-            this.State = new CpuState();
+            State = new CpuState();
         }
 
         public void RunInstructionCycle()
@@ -35,7 +34,7 @@ namespace CoreBoy.Core.Processors
             try
             {
                 // Fetch
-                var opcode = ReadByte(State.PC++);
+                var opcode = ReadByte(State.Pc++);
 
                 // Decode
                 var instruction = opcodeTable[opcode];
@@ -45,7 +44,7 @@ namespace CoreBoy.Core.Processors
             }
             catch (KeyNotFoundException e)
             {
-                throw new MissingOpcodeException($"Unimplemented opcode encountered: {ReadByte(--State.PC):X2}", e);
+                throw new MissingOpcodeException($"Unimplemented opcode encountered: {ReadByte(--State.Pc):X2}", e);
             }
         }
 
@@ -85,15 +84,15 @@ namespace CoreBoy.Core.Processors
 
         private void SetFlag(RegisterFlag flag, bool value)
         {
-            State.AF.Low[(int)flag] = value;
+            State.Af.Low[(int)flag] = value;
         }
 
         private bool GetFlag(RegisterFlag flag)
         {
-            return State.AF.Low[(int)flag];
+            return State.Af.Low[(int)flag];
         }
 
-        private IMmu mmu;
+        private readonly IMmu mmu;
 
         private readonly ILogger log;
     }
@@ -102,29 +101,29 @@ namespace CoreBoy.Core.Processors
     public class CpuState
     {
         [DataMember]
-        public RegisterWord AF = new RegisterWord();
+        public RegisterWord Af = new();
         [DataMember]
-        public RegisterWord BC = new RegisterWord();
+        public RegisterWord Bc = new();
         [DataMember]
-        public RegisterWord DE = new RegisterWord();
+        public RegisterWord De = new();
         [DataMember]
-        public RegisterWord HL = new RegisterWord();
+        public RegisterWord Hl = new();
         [DataMember]
-        public RegisterWord SP = new RegisterWord();
+        public RegisterWord Sp = new();
         [DataMember]
-        public RegisterWord PC = new RegisterWord();
+        public RegisterWord Pc = new();
 
         [DataMember]
-        public bool Halt = false;
+        public bool Halt;
         [DataMember]
-        public bool Stop = false;
+        public bool Stop;
 
         [DataMember]
-        public long Clock = 0;
+        public long Clock;
 
         public override string ToString()
         {
-            return $"AF: {AF.Value:X4}, BC: {BC.Value:X4}, DE: {DE.Value:X4}, HL: {HL.Value:X4}, SP: {SP.Value:X4}, PC: {PC.Value:X4}";
+            return $"AF: {Af.Value:X4}, BC: {Bc.Value:X4}, DE: {De.Value:X4}, HL: {Hl.Value:X4}, SP: {Sp.Value:X4}, PC: {Pc.Value:X4}";
         }
     }
 }

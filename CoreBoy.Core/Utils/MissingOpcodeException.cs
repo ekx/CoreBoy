@@ -1,5 +1,6 @@
 ﻿using System;
-namespace CoreBoy.Core
+
+namespace CoreBoy.Core.Utils
 {
     public class MissingOpcodeException : Exception
     {

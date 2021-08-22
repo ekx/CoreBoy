@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Runtime.Serialization;
+using CoreBoy.Core.Utils;
 
 namespace CoreBoy.Core.Cartridges
 {
@@ -10,8 +11,8 @@ namespace CoreBoy.Core.Cartridges
 
         public ICartridgeState State
         {
-            get { return state; }
-            set { state = (RomCartridgeState)value; }
+            get => state;
+            set => state = (RomCartridgeState)value;
         }
 
         public RomCartridge(ILogger<RomCartridge> log, byte[] data)

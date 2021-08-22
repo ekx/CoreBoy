@@ -31,15 +31,9 @@ namespace CoreBoy.Core.Utils
 
         public bool this[int bitIndex]
         {
-            get
-            {
-                return Value.GetBit(bitIndex);
-            }
+            get => Value.GetBit(bitIndex);
 
-            set
-            {
-                Value = Value.SetBit(bitIndex, value);
-            }
+            set => Value = Value.SetBit(bitIndex, value);
         }
 
         public override string ToString()

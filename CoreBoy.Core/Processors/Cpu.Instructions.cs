@@ -7,24 +7,24 @@ namespace CoreBoy.Core.Processors
     {
         private void DisableInterrupts()
         {
-            log.LogError("Disable interrupts not implemented.");
+            log.LogError("Disable interrupts not implemented");
         }
 
         private void EnableInterrupts()
         {
-            log.LogError("Enable interrupts not implemented.");
+            log.LogError("Enable interrupts not implemented");
         }
 
-        private void LoadSPIntoHL()
+        private void LoadSpIntoHl()
         {
-            byte value = ReadByte(State.PC++); 
+            byte value = ReadByte(State.Pc++); 
 
-            SetFlag(RegisterFlag.C, (State.SP.Low + value) > 0xFF);
-            SetFlag(RegisterFlag.H, ((State.SP & 0x0F) + (value & 0x0F)) > 0x0F);
+            SetFlag(RegisterFlag.C, (State.Sp.Low + value) > 0xFF);
+            SetFlag(RegisterFlag.H, ((State.Sp & 0x0F) + (value & 0x0F)) > 0x0F);
             SetFlag(RegisterFlag.N, false);
             SetFlag(RegisterFlag.Z, false);
 
-            State.HL = (ushort)(State.SP + (sbyte)value);
+            State.Hl = (ushort)(State.Sp + (sbyte)value);
 
             Idle();
         }
@@ -53,58 +53,58 @@ namespace CoreBoy.Core.Processors
 
         private void Jump(bool condition)
         {
-            var address = ReadWord(State.PC);
-            State.PC += 2;
+            var address = ReadWord(State.Pc);
+            State.Pc += 2;
 
             if (condition)
             {
-                State.PC = address;
+                State.Pc = address;
                 Idle();
             }
         }
 
         private void JumpRelative(bool condition)
         {
-            var offset = (sbyte)ReadByte(State.PC++);
+            var offset = (sbyte)ReadByte(State.Pc++);
 
             if (condition)
             {
-                State.PC = (ushort)(State.PC.Value + offset);
+                State.Pc = (ushort)(State.Pc.Value + offset);
                 Idle();
             }
         }
 
         private void Push(RegisterWord register)
         {
-            WriteByte(--State.SP, register.High);
-            WriteByte(--State.SP, register.Low);
+            WriteByte(--State.Sp, register.High);
+            WriteByte(--State.Sp, register.Low);
 
             Idle();
         }
 
         private void Pop(ref RegisterWord register)
         {
-            register.Low = ReadByte(State.SP++);
-            register.High = ReadByte(State.SP++);
+            register.Low = ReadByte(State.Sp++);
+            register.High = ReadByte(State.Sp++);
         }
 
         private void Call(bool condition)
         {
-            var address = ReadWord(State.PC);
-            State.PC += 2;
+            var address = ReadWord(State.Pc);
+            State.Pc += 2;
 
             if (condition)
             {
-                Push(State.PC);
-                State.PC = address;
+                Push(State.Pc);
+                State.Pc = address;
             }
         }
 
         private void Return()
         {
-            byte low = ReadByte(State.SP++);
-            byte high = ReadByte(State.SP++);
-            State.PC = (ushort)((high << 8) | low);
+            byte low = ReadByte(State.Sp++);
+            byte high = ReadByte(State.Sp++);
+            State.Pc = (ushort)((high << 8) | low);
             Idle();
         }
 
@@ -120,8 +120,8 @@ namespace CoreBoy.Core.Processors
 
         public void Add(byte value, bool carry)
         {
-            int result = State.AF.High + value;
-            int resultLow = (State.AF.High & 0x0F) + (value & 0x0F);
+            int result = State.Af.High + value;
+            int resultLow = (State.Af.High & 0x0F) + (value & 0x0F);
 
             if (carry && GetFlag(RegisterFlag.C))
             {
@@ -134,7 +134,7 @@ namespace CoreBoy.Core.Processors
             SetFlag(RegisterFlag.N, false);
             SetFlag(RegisterFlag.Z, (result & 0xFF) == 0);
 
-            State.AF.High = (byte)result;
+            State.Af.High = (byte)result;
         }
 
         public void Add(ref RegisterWord target, ushort value)
@@ -146,7 +146,7 @@ namespace CoreBoy.Core.Processors
             SetFlag(RegisterFlag.H, resultLow > 0x0FFF);
             SetFlag(RegisterFlag.N, false);
 
-            if (target == State.SP)
+            if (target == State.Sp)
             {
                 SetFlag(RegisterFlag.Z, false);
                 Idle();
@@ -158,8 +158,8 @@ namespace CoreBoy.Core.Processors
 
         public void Subtract(byte value, bool carry, bool assign = true)
         {
-            int result = State.AF.High - value;
-            int resultLow = (State.AF.High & 0x0F) - (value & 0x0F);
+            int result = State.Af.High - value;
+            int resultLow = (State.Af.High & 0x0F) - (value & 0x0F);
 
             if (carry && GetFlag(RegisterFlag.C))
             {
@@ -174,15 +174,15 @@ namespace CoreBoy.Core.Processors
 
             if (assign)
             {
-                State.AF.High = (byte)result;
+                State.Af.High = (byte)result;
             }
         }
 
         private void And(byte value)
         {
-            State.AF.High = (byte)(State.AF.High & value);
+            State.Af.High = (byte)(State.Af.High & value);
 
-            SetFlag(RegisterFlag.Z, State.AF.High == 0x00);
+            SetFlag(RegisterFlag.Z, State.Af.High == 0x00);
             SetFlag(RegisterFlag.N, false);
             SetFlag(RegisterFlag.H, true);
             SetFlag(RegisterFlag.C, false);
@@ -190,9 +190,9 @@ namespace CoreBoy.Core.Processors
 
         private void ExclusiveOr(byte value)
         {
-            State.AF.High = (byte)(State.AF.High ^ value);
+            State.Af.High = (byte)(State.Af.High ^ value);
 
-            SetFlag(RegisterFlag.Z, State.AF.High == 0x00);
+            SetFlag(RegisterFlag.Z, State.Af.High == 0x00);
             SetFlag(RegisterFlag.N, false);
             SetFlag(RegisterFlag.H, false);
             SetFlag(RegisterFlag.C, false);
@@ -200,9 +200,9 @@ namespace CoreBoy.Core.Processors
 
         private void Or(byte value)
         {
-            State.AF.High = (byte)(State.AF.High | value);
+            State.Af.High = (byte)(State.Af.High | value);
 
-            SetFlag(RegisterFlag.Z, State.AF.High == 0x00);
+            SetFlag(RegisterFlag.Z, State.Af.High == 0x00);
             SetFlag(RegisterFlag.N, false);
             SetFlag(RegisterFlag.H, false);
             SetFlag(RegisterFlag.C, false);

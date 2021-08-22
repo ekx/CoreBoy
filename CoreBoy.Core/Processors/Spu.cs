@@ -19,7 +19,7 @@ namespace CoreBoy.Core.Processors
         {
             log.LogInformation("SPU reset");
 
-            this.State = new SpuState();
+            State = new SpuState();
         }
 
         public byte this[ushort address]

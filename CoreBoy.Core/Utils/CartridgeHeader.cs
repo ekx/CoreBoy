@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace CoreBoy.Core.Cartridges
+namespace CoreBoy.Core.Utils
 {
     public class CartridgeHeader
     {
@@ -32,59 +32,30 @@ namespace CoreBoy.Core.Cartridges
             SGBFlag = data[0x0146] == 0x03;
             CartType = (CartridgeType)data[0x0147];
 
-            switch (data[0x0148])
+            RomSize = data[0x0148] switch
             {
-                case 0x00:
-                    RomSize = new RomSize(2);
-                    break;
-                case 0x01:
-                    RomSize = new RomSize(4);
-                    break;
-                case 0x02:
-                    RomSize = new RomSize(8);
-                    break;
-                case 0x03:
-                    RomSize = new RomSize(16);
-                    break;
-                case 0x04:
-                    RomSize = new RomSize(32);
-                    break;
-                case 0x05:
-                    RomSize = new RomSize(64);
-                    break;
-                case 0x06:
-                    RomSize = new RomSize(128);
-                    break;
-                case 0x07:
-                    RomSize = new RomSize(256);
-                    break;
+                0x00 => new RomSize(2),
+                0x01 => new RomSize(4),
+                0x02 => new RomSize(8),
+                0x03 => new RomSize(16),
+                0x04 => new RomSize(32),
+                0x05 => new RomSize(64),
+                0x06 => new RomSize(128),
+                0x07 => new RomSize(256),
+                0x52 => new RomSize(72),
+                0x53 => new RomSize(80),
+                0x54 => new RomSize(96),
+                _ => RomSize
+            };
 
-                case 0x52:
-                    RomSize = new RomSize(72);
-                    break;
-                case 0x53:
-                    RomSize = new RomSize(80);
-                    break;
-                case 0x54:
-                    RomSize = new RomSize(96);
-                    break;
-            }
-
-            switch (data[0x0149])
+            RamSize = data[0x0149] switch
             {
-                case 0x00:
-                    RamSize = new RamSize(0, 0);
-                    break;
-                case 0x01:
-                    RamSize = new RamSize(2 * 1024, 1);
-                    break;
-                case 0x02:
-                    RamSize = new RamSize(8 * 1024, 1);
-                    break;
-                case 0x03:
-                    RamSize = new RamSize(8 * 1024, 4);
-                    break;
-            }
+                0x00 => new RamSize(0, 0),
+                0x01 => new RamSize(2 * 1024, 1),
+                0x02 => new RamSize(8 * 1024, 1),
+                0x03 => new RamSize(8 * 1024, 4),
+                _ => RamSize
+            };
 
             NonJapaneseRom = data[0x014A] == 0x01;
             OldLicenseeCode = data[0x014B];
@@ -92,8 +63,8 @@ namespace CoreBoy.Core.Cartridges
 
             HeaderChecksum = data[0x014D];
 
-            int temp = 0;
-            for (int i = 0x0134; i <= 0x014C; i++)
+            var temp = 0;
+            for (var i = 0x0134; i <= 0x014C; i++)
             {
                 temp = temp - data[i] - 1;
             }
@@ -115,9 +86,9 @@ namespace CoreBoy.Core.Cartridges
 
         private string ExtractTitle(byte[] data)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-            for (int i = 0x0134; i <= 0x0142; i++)
+            for (var i = 0x0134; i <= 0x0142; i++)
             {
                 if (data[i] == 0x00)
                     break;
@@ -129,9 +100,9 @@ namespace CoreBoy.Core.Cartridges
 
         private string ExtractLicenseeCode(byte[] data)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-            for (int i = 0x0144; i <= 0x0145; i++)
+            for (var i = 0x0144; i <= 0x0145; i++)
             {
                 sb.Append((char)data[i]);
             }
@@ -142,27 +113,27 @@ namespace CoreBoy.Core.Cartridges
 
     public struct RomSize
     {
-        public int BankSize { get; private set; }
-        public int BankCount { get; private set; }
-        public int Total { get { return BankSize * BankCount; } }
+        public int BankSize { get; }
+        public int BankCount { get; }
+        public int Total => BankSize * BankCount;
 
         public RomSize(int bankCount)
         {
-            this.BankSize = 16 * 1024;
-            this.BankCount = bankCount;
+            BankSize = 16 * 1024;
+            BankCount = bankCount;
         }
     }
     
     public struct RamSize
     {
-        public int BankSize { get; private set; }
-        public int BankCount { get; private set; }
-        public int Total { get { return BankSize * BankCount; } }
+        public int BankSize { get; }
+        public int BankCount { get; }
+        public int Total => BankSize * BankCount;
 
         public RamSize(int bankSize, int bankCount)
         {
-            this.BankSize = bankSize;
-            this.BankCount = bankCount;
+            BankSize = bankSize;
+            BankCount = bankCount;
         }
     }
 }

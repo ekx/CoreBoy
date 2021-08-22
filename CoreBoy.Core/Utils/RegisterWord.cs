@@ -12,12 +12,9 @@ namespace CoreBoy.Core.Utils
 
         public ushort Value
         {
-            get
-            {
-                return (ushort)(Low + (High << 8));
-            }
+            get => (ushort)(Low + (High << 8));
 
-            set
+            private init
             {
                 Low = (byte)(value & 0x00FF);
                 High = (byte)(value >> 8);

@@ -9,7 +9,7 @@ namespace CoreBoy.Core.Utils
     {
         public byte Value
         {
-            get { return value; }
+            get => value;
             set
             {
                 this.value = value;
@@ -23,15 +23,9 @@ namespace CoreBoy.Core.Utils
 
         public bool this[int bitIndex]
         {
-            get
-            {
-                return Value.GetBit(bitIndex);
-            }
+            get => Value.GetBit(bitIndex);
 
-            set
-            {
-                Value = Value.SetBit(bitIndex, value);
-            }
+            set => Value = Value.SetBit(bitIndex, value);
         }
 
         public MemoryCell()
@@ -40,18 +34,18 @@ namespace CoreBoy.Core.Utils
             lockedBits = new Dictionary<int, bool>();
         }
 
-        public void LockBit(int index, bool value)
+        public void LockBit(int index, bool valueIn)
         {
             if (!lockedBits.ContainsKey(index))
             {
-                lockedBits.Add(index, value);
+                lockedBits.Add(index, valueIn);
             }
             else
             {
-                lockedBits[index] = value;
+                lockedBits[index] = valueIn;
             }
 
-            this.value = this.value.SetBit(index, value);
+            value = value.SetBit(index, valueIn);
         }
 
         public override string ToString()

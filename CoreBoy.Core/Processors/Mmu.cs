@@ -11,8 +11,8 @@ namespace CoreBoy.Core.Processors
 
         public ICartridgeState CartridgeState
         {
-            get { return cartridge.State; }
-            set { cartridge.State = value; }
+            get => cartridge.State;
+            set => cartridge.State = value;
         }
 
         public Mmu(ILogger<Mmu> log, IPpu ppu, ISpu spu)
@@ -26,7 +26,7 @@ namespace CoreBoy.Core.Processors
         {
             log.LogInformation("MMU reset");
 
-            this.State = new MmuState();
+            State = new MmuState();
         }
 
         public virtual byte this[ushort address]
@@ -153,14 +153,14 @@ namespace CoreBoy.Core.Processors
             }
         }
 
-        public void LoadBootRom(byte[] bootRom)
+        public void LoadBootRom(byte[] bootRomIn)
         {
-            this.bootRom = bootRom;
+            bootRom = bootRomIn;
         }
 
-        public void LoadCartridge(ICartridge cartridge)
+        public void LoadCartridge(ICartridge cartridgeIn)
         {
-            this.cartridge = cartridge;
+            cartridge = cartridgeIn;
         }
 
         public virtual void UpdateState(long cycles)
@@ -168,7 +168,7 @@ namespace CoreBoy.Core.Processors
             ppu.UpdateState(cycles);
         }
 
-        private IPpu ppu;
+        private readonly IPpu ppu;
         private ISpu spu;
         private ICartridge cartridge;
         private byte[] bootRom = new byte[256];

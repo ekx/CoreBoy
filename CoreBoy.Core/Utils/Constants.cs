@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CoreBoy.Core
+﻿namespace CoreBoy.Core.Utils
 {
     public enum CartridgeType : byte
     {

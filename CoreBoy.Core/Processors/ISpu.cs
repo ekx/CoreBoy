@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CoreBoy.Core.Processors
+﻿namespace CoreBoy.Core.Processors
 {
     public interface ISpu
     {

@@ -8,8 +8,8 @@ namespace CoreBoy.Core.Processors
         ICartridgeState CartridgeState { get; set; }
 
         void Reset();
-        void LoadBootRom(byte[] bootRom);
-        void LoadCartridge(ICartridge cartridge);
+        void LoadBootRom(byte[] bootRomIn);
+        void LoadCartridge(ICartridge cartridgeIn);
         void UpdateState(long cycles);
         byte this[ushort address] { get; set; }
     }
