@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
 {
-    public partial class Cpu
+    public sealed partial class Cpu
     {
         private void DisableInterrupts()
         {
@@ -17,7 +17,7 @@ namespace CoreBoy.Core.Processors
 
         private void LoadSpIntoHl()
         {
-            byte value = ReadByte(State.Pc++); 
+            var value = ReadByte(State.Pc++); 
 
             SetFlag(RegisterFlag.C, (State.Sp.Low + value) > 0xFF);
             SetFlag(RegisterFlag.H, ((State.Sp & 0x0F) + (value & 0x0F)) > 0x0F);
@@ -56,22 +56,20 @@ namespace CoreBoy.Core.Processors
             var address = ReadWord(State.Pc);
             State.Pc += 2;
 
-            if (condition)
-            {
-                State.Pc = address;
-                Idle();
-            }
+            if (!condition) return;
+            
+            State.Pc = address;
+            Idle();
         }
 
         private void JumpRelative(bool condition)
         {
             var offset = (sbyte)ReadByte(State.Pc++);
 
-            if (condition)
-            {
-                State.Pc = (ushort)(State.Pc.Value + offset);
-                Idle();
-            }
+            if (!condition) return;
+            
+            State.Pc = (ushort)(State.Pc.Value + offset);
+            Idle();
         }
 
         private void Push(RegisterWord register)
@@ -93,17 +91,16 @@ namespace CoreBoy.Core.Processors
             var address = ReadWord(State.Pc);
             State.Pc += 2;
 
-            if (condition)
-            {
-                Push(State.Pc);
-                State.Pc = address;
-            }
+            if (!condition) return;
+            
+            Push(State.Pc);
+            State.Pc = address;
         }
 
         private void Return()
         {
-            byte low = ReadByte(State.Sp++);
-            byte high = ReadByte(State.Sp++);
+            var low = ReadByte(State.Sp++);
+            var high = ReadByte(State.Sp++);
             State.Pc = (ushort)((high << 8) | low);
             Idle();
         }
@@ -120,8 +117,8 @@ namespace CoreBoy.Core.Processors
 
         public void Add(byte value, bool carry)
         {
-            int result = State.Af.High + value;
-            int resultLow = (State.Af.High & 0x0F) + (value & 0x0F);
+            var result = State.Af.High + value;
+            var resultLow = (State.Af.High & 0x0F) + (value & 0x0F);
 
             if (carry && GetFlag(RegisterFlag.C))
             {
@@ -139,8 +136,8 @@ namespace CoreBoy.Core.Processors
 
         public void Add(ref RegisterWord target, ushort value)
         {
-            int result = target.Value + value;
-            int resultLow = (target.Value & 0x0FFF) + (value & 0x0FFF);
+            var result = target.Value + value;
+            var resultLow = (target.Value & 0x0FFF) + (value & 0x0FFF);
 
             SetFlag(RegisterFlag.C, result > 0xFFFF);
             SetFlag(RegisterFlag.H, resultLow > 0x0FFF);
@@ -158,8 +155,8 @@ namespace CoreBoy.Core.Processors
 
         public void Subtract(byte value, bool carry, bool assign = true)
         {
-            int result = State.Af.High - value;
-            int resultLow = (State.Af.High & 0x0F) - (value & 0x0F);
+            var result = State.Af.High - value;
+            var resultLow = (State.Af.High & 0x0F) - (value & 0x0F);
 
             if (carry && GetFlag(RegisterFlag.C))
             {
@@ -217,7 +214,7 @@ namespace CoreBoy.Core.Processors
 
         private void RotateLeft(ref RegisterByte value, bool carry)
         {
-            bool bit7 = (value >> 7) == 1;
+            var bit7 = (value >> 7) == 1;
             value = (byte)(value << 1);
 
             if (carry)
@@ -241,7 +238,7 @@ namespace CoreBoy.Core.Processors
 
         private void RotateRight(ref RegisterByte value, bool carry)
         {
-            bool bit0 = (value & 1) == 1;
+            var bit0 = (value & 1) == 1;
             value = (byte)(value >> 1);
 
             if (carry)

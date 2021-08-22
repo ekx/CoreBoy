@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
 {
-    public partial class Cpu
+    public sealed partial class Cpu
     {
 		private void InitOpcodes()
         {
@@ -47,7 +47,7 @@ namespace CoreBoy.Core.Processors
                 { 0x43, () => { State.Bc.High = State.De.Low; } },                                          // LD B, E
                 { 0x44, () => { State.Bc.High = State.Hl.High; } },                                         // LD B, H
                 { 0x45, () => { State.Bc.High = State.Hl.Low; } },                                          // LD B, L
-                { 0x46, () => { State.Bc.High = ReadByte(State.Hl); } },                                // LD B, (HL)
+                { 0x46, () => { State.Bc.High = ReadByte(State.Hl); } },                               // LD B, (HL)
                 { 0x47, () => { State.Bc.High = State.Af.High; } },                                         // LD B, A
 
                 { 0x48, () => { State.Bc.Low = State.Bc.High; } },                                          // LD C, B
@@ -56,7 +56,7 @@ namespace CoreBoy.Core.Processors
                 { 0x4B, () => { State.Bc.Low = State.De.Low; } },                                           // LD C, E
                 { 0x4C, () => { State.Bc.Low = State.Hl.High; } },                                          // LD C, H
                 { 0x4D, () => { State.Bc.Low = State.Hl.Low; } },                                           // LD C, L
-                { 0x4E, () => { State.Bc.Low = ReadByte(State.Hl); } },                                 // LD C, (HL)
+                { 0x4E, () => { State.Bc.Low = ReadByte(State.Hl); } },                                // LD C, (HL)
                 { 0x4F, () => { State.Bc.Low = State.Af.High; } },                                          // LD C, A
 
                 { 0x50, () => { State.De.High = State.Bc.High; } },                                         // LD D, B
@@ -65,7 +65,7 @@ namespace CoreBoy.Core.Processors
                 { 0x53, () => { State.De.High = State.De.Low; } },                                          // LD D, E
                 { 0x54, () => { State.De.High = State.Hl.High; } },                                         // LD D, H
                 { 0x55, () => { State.De.High = State.Hl.Low; } },                                          // LD D, L
-                { 0x56, () => { State.De.High = ReadByte(State.Hl); } },                                // LD D, (HL)
+                { 0x56, () => { State.De.High = ReadByte(State.Hl); } },                               // LD D, (HL)
                 { 0x57, () => { State.De.High = State.Af.High; } },                                         // LD D, A
 
                 { 0x58, () => { State.De.Low = State.Bc.High; } },                                          // LD E, B
@@ -74,7 +74,7 @@ namespace CoreBoy.Core.Processors
                 { 0x5B, () => { State.De.Low = State.De.Low; } },                                           // LD E, E
                 { 0x5C, () => { State.De.Low = State.Hl.High; } },                                          // LD E, H
                 { 0x5D, () => { State.De.Low = State.Hl.Low; } },                                           // LD E, L
-                { 0x5E, () => { State.De.Low = ReadByte(State.Hl); } },                                 // LD E, (HL)
+                { 0x5E, () => { State.De.Low = ReadByte(State.Hl); } },                                // LD E, (HL)
                 { 0x5F, () => { State.De.Low = State.Af.High; } },                                          // LD E, A
 
                 { 0x60, () => { State.Hl.High = State.Bc.High; } },                                         // LD H, B
@@ -83,7 +83,7 @@ namespace CoreBoy.Core.Processors
                 { 0x63, () => { State.Hl.High = State.De.Low; } },                                          // LD H, E
                 { 0x64, () => { State.Hl.High = State.Hl.High; } },                                         // LD H, H
                 { 0x65, () => { State.Hl.High = State.Hl.Low; } },                                          // LD H, L
-                { 0x66, () => { State.Hl.High = ReadByte(State.Hl); } },                                // LD H, (HL)
+                { 0x66, () => { State.Hl.High = ReadByte(State.Hl); } },                               // LD H, (HL)
                 { 0x67, () => { State.Hl.High = State.Af.High; } },                                         // LD H, A
 
                 { 0x68, () => { State.Hl.Low = State.Bc.High; } },                                          // LD L, B
@@ -92,7 +92,7 @@ namespace CoreBoy.Core.Processors
                 { 0x6B, () => { State.Hl.Low = State.De.Low; } },                                           // LD L, E
                 { 0x6C, () => { State.Hl.Low = State.Hl.High; } },                                          // LD L, H
                 { 0x6D, () => { State.Hl.Low = State.Hl.Low; } },                                           // LD L, L
-                { 0x6E, () => { State.Hl.Low = ReadByte(State.Hl); } },                                 // LD L, (HL)
+                { 0x6E, () => { State.Hl.Low = ReadByte(State.Hl); } },                                // LD L, (HL)
                 { 0x6F, () => { State.Hl.Low = State.Af.High; } },                                          // LD L, A
 
                 { 0x70, () => { WriteByte(State.Hl, State.Bc.High); } },                                // LD (HL), B
@@ -451,7 +451,7 @@ namespace CoreBoy.Core.Processors
                 { 0x7C, () => { TestBit(State.Hl.High, 7); } },										// BIT 7, H
                 { 0x7D, () => { TestBit(State.Hl.Low, 7); } },											// BIT 7, L
                 { 0x7E, () => { TestBit(ReadByte(State.Hl), 7); } },								// BIT 7, (HL)
-                { 0x7F, () => { TestBit(State.Af.High, 7); } }											// BIT 7, A
+                { 0x7F, () => { TestBit(State.Af.High, 7); } }										    // BIT 7, A
             };
         }
 

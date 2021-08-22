@@ -5,21 +5,21 @@ namespace CoreBoy.Core.Utils
 {
     public class CartridgeHeader
     {
-        public string Title;                    // Title-- Max 16 chars trailed by zeroes.
-        public bool CGBFlag;                    // Set if game is a Game Boy Color game.
+        public readonly string Title;           // Title-- Max 16 chars trailed by zeroes.
+        public bool CgbFlag;                    // Set if game is a Game Boy Color game.
         public string NewLicenseeCode;          // 2 char ASCII code only found in games released after the Super Game Boy
-        public bool SGBFlag;                    // Set if game utilizes Super Game Boy features-- Features won't work if not set
+        public bool SgbFlag;                    // Set if game utilizes Super Game Boy features-- Features won't work if not set
         public CartridgeType CartType;          // Specifies which (if any) Memory Bank Controller is used by the cartridge
         public RomSize RomSize;                 // Specifies size and amount of ROM banks
         public RamSize RamSize;                 // Specifies size and amount of RAM banks
         public bool NonJapaneseRom;             // If set Cartridge wasn't sold in Japan
         public byte OldLicenseeCode;            // Set to 0x33 if new licensee code is used-- 0x79 = Accolade, 0xA4 == Konami
-        public byte MaskROMVersion;             // Version of Game-- Usually 0x00
-        public byte HeaderChecksum;             // Cartridges with faulty Header Checksum won't boot on original hardware
+        public byte MaskRomVersion;             // Version of Game-- Usually 0x00
+        public readonly byte HeaderChecksum;    // Cartridges with faulty Header Checksum won't boot on original hardware
         public int GlobalChecksum;              // Produced by adding all bytes of the cartridge, except for the two checksum bytes-- Ignored by Game Boy
 
         public bool NoVerticalBlankInterruptHandler;
-        public bool NoLCDCStatusInterruptHandler;
+        public bool NoLcdcStatusInterruptHandler;
         public bool NoTimerOverflowInterruptHandler;
         public bool NoSerialTransferCompletionInterruptHandler;
         public bool NoHighToLowOfP10ToP13InterruptHandler;
@@ -27,9 +27,9 @@ namespace CoreBoy.Core.Utils
         public CartridgeHeader(ILogger log, byte[] data)
         {
             Title = ExtractTitle(data);
-            CGBFlag = data[0x0143] == 0x80;
+            CgbFlag = data[0x0143] == 0x80;
             NewLicenseeCode = ExtractLicenseeCode(data);
-            SGBFlag = data[0x0146] == 0x03;
+            SgbFlag = data[0x0146] == 0x03;
             CartType = (CartridgeType)data[0x0147];
 
             RomSize = data[0x0148] switch
@@ -59,7 +59,7 @@ namespace CoreBoy.Core.Utils
 
             NonJapaneseRom = data[0x014A] == 0x01;
             OldLicenseeCode = data[0x014B];
-            MaskROMVersion = data[0x014C];
+            MaskRomVersion = data[0x014C];
 
             HeaderChecksum = data[0x014D];
 
@@ -75,16 +75,16 @@ namespace CoreBoy.Core.Utils
                 log.LogWarning($"HeaderChecksum invalid. Cartridge: {Title}");
             }
 
-            GlobalChecksum = (((int)data[0x014E]) << 8) | data[0x014F];
+            GlobalChecksum = (data[0x014E] << 8) | data[0x014F];
 
             NoVerticalBlankInterruptHandler = data[0x0040] == 0xD9;
-            NoLCDCStatusInterruptHandler = data[0x0048] == 0xD9;
+            NoLcdcStatusInterruptHandler = data[0x0048] == 0xD9;
             NoTimerOverflowInterruptHandler = data[0x0050] == 0xD9;
             NoSerialTransferCompletionInterruptHandler = data[0x0058] == 0xD9;
             NoHighToLowOfP10ToP13InterruptHandler = data[0x0060] == 0xD9;
         }
 
-        private string ExtractTitle(byte[] data)
+        private static string ExtractTitle(byte[] data)
         {
             var sb = new StringBuilder();
 
@@ -98,7 +98,7 @@ namespace CoreBoy.Core.Utils
             return sb.ToString();
         }
 
-        private string ExtractLicenseeCode(byte[] data)
+        private static string ExtractLicenseeCode(byte[] data)
         {
             var sb = new StringBuilder();
 
@@ -111,7 +111,7 @@ namespace CoreBoy.Core.Utils
         }
     }
 
-    public struct RomSize
+    public readonly struct RomSize
     {
         public int BankSize { get; }
         public int BankCount { get; }
@@ -124,7 +124,7 @@ namespace CoreBoy.Core.Utils
         }
     }
     
-    public struct RamSize
+    public readonly struct RamSize
     {
         public int BankSize { get; }
         public int BankCount { get; }

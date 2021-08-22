@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using System.Runtime.Serialization;
 using CoreBoy.Core.Utils;
 
@@ -7,7 +8,7 @@ namespace CoreBoy.Core.Cartridges
     [DataContract]
     public class RomCartridge : ICartridge
     {
-        public CartridgeHeader CartInfo { get; set; }
+        public CartridgeHeader CartInfo { get; }
 
         public ICartridgeState State
         {
@@ -19,8 +20,13 @@ namespace CoreBoy.Core.Cartridges
         {
             this.log = log;
 
+            if (data.Length != 32768)
+                throw new ArgumentOutOfRangeException(nameof(data), "Cartridge data has invalid length");
+                
             CartInfo = new CartridgeHeader(log, data);
-            this.rom = data;
+            rom = data;
+
+            State = new RomCartridgeState();
         }
 
         public byte this[ushort address]
@@ -34,7 +40,7 @@ namespace CoreBoy.Core.Cartridges
                     return rom[address];
                 }
                 // [A000-BFFF] Cartridge RAM
-                else if (address >= 0xA000 && address < 0xC000)
+                else if (address is >= 0xA000 and < 0xC000)
                 {
                     log.LogWarning($"Read from nonexistent cartridge RAM. Address: {address:X4}");
                     return 0x00;
@@ -54,7 +60,7 @@ namespace CoreBoy.Core.Cartridges
                     log.LogWarning($"Write to read-only cartridge ROM. Address: {address:X4}, Value: {value:X2}");
                 }
                 // [A000-BFFF] Cartridge RAM
-                else if (address >= 0xA000 && address < 0xC000)
+                else if (address is >= 0xA000 and < 0xC000)
                 {
                     log.LogWarning($"Write to nonexistent cartridge RAM. Address: {address:X4}, Value: {value:X2}");
                 }
@@ -65,7 +71,7 @@ namespace CoreBoy.Core.Cartridges
             }
         }
 
-        private byte[] rom = new byte[32767];
+        private readonly byte[] rom;
         private RomCartridgeState state;
 
         private readonly ILogger log;

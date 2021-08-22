@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
 {
-    public partial class Cpu : ICpu
+    public sealed partial class Cpu : ICpu
     {
         public CpuState State { get; set; }
 

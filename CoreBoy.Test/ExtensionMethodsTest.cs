@@ -33,7 +33,7 @@ namespace CoreBoy.Test
         [DataRow(7, (byte)128)]
         public void ClearBit(int bitIndex, byte initialValue)
         {
-            byte test = initialValue.SetBit(bitIndex, false);
+            var test = initialValue.SetBit(bitIndex, false);
             Assert.AreEqual(0, test);
         }
 

@@ -2,6 +2,7 @@
 {
     public enum CartridgeType : byte
     {
+        // ReSharper disable InconsistentNaming
         ROM = 0x00,
         ROM_MBC1 = 0x01,
         ROM_MBC1_RAM = 0x02,
@@ -28,10 +29,12 @@
         BandaiTAMA5 = 0xFD,
         HudsonHuC3 = 0xFE,
         HudsonHuC1 = 0xFF,
+        // ReSharper restore InconsistentNaming
     }
 
-    public static class GraphicsIO
+    public static class GraphicsIo
     {
+        // ReSharper disable InconsistentNaming
         public const int LCDC = 0;
         public const int STAT = 1;
         public const int SCY = 2;
@@ -44,29 +47,31 @@
         public const int OBP1 = 9;
         public const int WY = 10;
         public const int WX = 11;
+        // ReSharper restore InconsistentNaming
+
     }
 
-    public static class LCDControl
+    public static class LcdControl
     {
-        public const int BGEnabled = 0;
+        public const int BgEnabled = 0;
         public const int SpritesEnabled = 1;
         public const int SpriteSize = 2;
-        public const int BGTileMap = 3;
+        public const int BgTileMap = 3;
         public const int TileSet = 4;
         public const int WindowEnabled = 5;
         public const int WindowTileMap = 6;
-        public const int LCDPower = 7;
+        public const int LcdPower = 7;
     }
 
-    public static class LCDStatus
+    public static class LcdStatus
     {
         public const int ScreenModeHigh = 0;
         public const int ScreenModeLow = 1;
-        public const int LYCSignal = 2;
+        public const int LycSignal = 2;
         public const int HBlankCheckEnabled = 3;
         public const int VBlankCheckEnabled = 4;
-        public const int OAMCheckEnabled = 5;
-        public const int LYCCheckEnabled = 6;
+        public const int OamCheckEnabled = 5;
+        public const int LycCheckEnabled = 6;
         public const int Unused = 7;
     }
 
@@ -74,7 +79,7 @@
     {
         HBlank = 0,
         VBlank = 1,
-        AccessingOAM = 2,
+        AccessingOam = 2,
         TransferringData = 3
     }
 

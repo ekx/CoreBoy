@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
 {
-    public class Ppu : IPpu
+    public sealed class Ppu : IPpu
     {
         public event RenderFramebufferDelegate RenderFramebufferHandler;
 
@@ -29,9 +29,9 @@ namespace CoreBoy.Core.Processors
             get
             {
                 // [8000-9FFF] Graphics RAM
-                if (address >= 0x8000 && address < 0xA000)
+                if (address is >= 0x8000 and < 0xA000)
                 {
-                    if (State.Io[GraphicsIO.LCDC][LCDControl.LCDPower] && (int)ScreenMode == 3)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode == 3)
                     {
                         log.LogWarning($"Read from Graphics RAM while inaccessible. Address: {address:X4}");
                         return 0xFF;
@@ -41,9 +41,9 @@ namespace CoreBoy.Core.Processors
                     return State.Vram[address & 0x1FFF];
                 }
                 // [FE00-FE9F] Object Attribute Memory
-                else if (address >= 0xFE00 && address < 0xFEA0)
+                else if (address is >= 0xFE00 and < 0xFEA0)
                 {
-                    if (State.Io[GraphicsIO.LCDC][LCDControl.LCDPower] && (int)ScreenMode >= 2)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode >= 2)
                     {
                         log.LogWarning($"Read from OAM while inaccessible. Address: {address:X4}");
                         return 0xFF;
@@ -53,7 +53,7 @@ namespace CoreBoy.Core.Processors
                     return State.Oam[address & 0xFF];
                 }
                 // [FF40-FF4B] Graphics IO
-                else if (address >= 0xFF40 && address < 0xFF4C)
+                else if (address is >= 0xFF40 and < 0xFF4C)
                 {
                     //log.LogDebug($"Read from Graphics IO. Address: {address:X4}, Value {State.IO[address & 0xF]:X2}");
                     return State.Io[address & 0xF].Value;
@@ -68,9 +68,9 @@ namespace CoreBoy.Core.Processors
             set
             {
                 // [8000-9FFF] Graphics RAM
-                if (address >= 0x8000 && address < 0xA000)
+                if (address is >= 0x8000 and < 0xA000)
                 {
-                    if (State.Io[GraphicsIO.LCDC][LCDControl.LCDPower] && (int)ScreenMode == 3)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode == 3)
                     {
                         log.LogWarning($"Write to Graphics RAM while inaccessible. Address: {address:X4}, Value: {value:X2}");
                         return;
@@ -80,9 +80,9 @@ namespace CoreBoy.Core.Processors
                     State.Vram[address & 0x1FFF] = value;
                 }
                 // [FE00-FE9F] Object Attribute Memory
-                else if (address >= 0xFE00 && address < 0xFEA0)
+                else if (address is >= 0xFE00 and < 0xFEA0)
                 {
-                    if (State.Io[GraphicsIO.LCDC][LCDControl.LCDPower] && (int)ScreenMode >= 2)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode >= 2)
                     {
                         log.LogWarning($"Write to OAM while inaccessible. Address: {address:X4}, Value: {value:X2}");
                         return;
@@ -92,7 +92,7 @@ namespace CoreBoy.Core.Processors
                     State.Oam[address & 0xFF] = value;
                 }
                 // [FF40-FF4B] Graphics IO
-                else if (address >= 0xFF40 && address < 0xFF4C)
+                else if (address is >= 0xFF40 and < 0xFF4C)
                 {
                     //log.LogDebug($"Write to Graphics IO. Address: {address:X4}, Value: {value:X2}");
                     State.Io[address & 0xF].Value = value;
@@ -107,7 +107,7 @@ namespace CoreBoy.Core.Processors
         public void UpdateState(long cycles)
         {
             // TODO: Is this right? Also VRAM and OAM access?
-            if (!State.Io[GraphicsIO.LCDC][LCDControl.LCDPower])
+            if (!State.Io[GraphicsIo.LCDC][LcdControl.LcdPower])
             {
                 return;
             }
@@ -122,7 +122,7 @@ namespace CoreBoy.Core.Processors
                 case ScreenMode.VBlank:
                     UpdateVBlank();
                     break;
-                case ScreenMode.AccessingOAM:
+                case ScreenMode.AccessingOam:
                     UpdateAccessingOam();
                     break;
                 case ScreenMode.TransferringData:
@@ -137,18 +137,18 @@ namespace CoreBoy.Core.Processors
         {
             if (State.Clock >= 204)
             {
-                if (State.Io[GraphicsIO.LY].Value == 143)
+                if (State.Io[GraphicsIo.LY].Value == 143)
                 {
                     ScreenMode = ScreenMode.VBlank;
                     RenderFramebufferHandler?.Invoke(framebuffer);
                 }
                 else
                 {
-                    ScreenMode = ScreenMode.AccessingOAM;
+                    ScreenMode = ScreenMode.AccessingOam;
                 }
 
                 State.Clock = 0;
-                State.Io[GraphicsIO.LY].Value++;
+                State.Io[GraphicsIo.LY].Value++;
             }
         }
 
@@ -157,12 +157,12 @@ namespace CoreBoy.Core.Processors
             if (State.Clock >= 456)
             {
                 State.Clock = 0;
-                State.Io[GraphicsIO.LY].Value++;
+                State.Io[GraphicsIo.LY].Value++;
 
-                if (State.Io[GraphicsIO.LY].Value > 153)
+                if (State.Io[GraphicsIo.LY].Value > 153)
                 {
-                    ScreenMode = ScreenMode.AccessingOAM;
-                    State.Io[GraphicsIO.LY].Value = 0;
+                    ScreenMode = ScreenMode.AccessingOam;
+                    State.Io[GraphicsIo.LY].Value = 0;
                 }
             }
         }
@@ -189,7 +189,7 @@ namespace CoreBoy.Core.Processors
 
         private void RenderScanline()
         {
-            if (State.Io[GraphicsIO.LCDC][LCDControl.BGEnabled])
+            if (State.Io[GraphicsIo.LCDC][LcdControl.BgEnabled])
             {
                 RenderBackground();
             }
@@ -197,10 +197,10 @@ namespace CoreBoy.Core.Processors
 
         private void RenderBackground()
         {
-            byte x = State.Io[GraphicsIO.SCX].Value;
-            byte y = (byte)((State.Io[GraphicsIO.LY].Value + State.Io[GraphicsIO.SCY].Value) & 0xFF);
+            byte x = State.Io[GraphicsIo.SCX].Value;
+            byte y = (byte)((State.Io[GraphicsIo.LY].Value + State.Io[GraphicsIo.SCY].Value) & 0xFF);
 
-            ushort tileMapOffset = State.Io[GraphicsIO.LCDC][LCDControl.BGTileMap] ? (ushort)0x9C00 : (ushort)0x9800;
+            ushort tileMapOffset = State.Io[GraphicsIo.LCDC][LcdControl.BgTileMap] ? (ushort)0x9C00 : (ushort)0x9800;
 
             RenderToFramebuffer(x, y, tileMapOffset);
         }
@@ -208,7 +208,7 @@ namespace CoreBoy.Core.Processors
         private void RenderToFramebuffer(byte x, byte y, ushort tileMapOffset)
         {
             // TODO: Should be cleaned up & performance improved
-            var tileDataOffset = State.Io[GraphicsIO.LCDC][LCDControl.TileSet] ? (ushort)0x8000 : (ushort)0x8800;
+            var tileDataOffset = State.Io[GraphicsIo.LCDC][LcdControl.TileSet] ? (ushort)0x8000 : (ushort)0x8800;
             var mapOffset = (tileDataOffset == 0x8800) ? 128 : 0;
 
             for (var i = 0; i < Graphics.ScreenWidth; i++)
@@ -231,7 +231,7 @@ namespace CoreBoy.Core.Processors
                
                 var colorValue = CalculatePixelValue(byte1, byte2, pixelX);
 
-                var framebufferIndex = ((State.Io[GraphicsIO.LY].Value * Graphics.ScreenWidth) + i) * 4;
+                var framebufferIndex = ((State.Io[GraphicsIo.LY].Value * Graphics.ScreenWidth) + i) * 4;
 
                 framebuffer[framebufferIndex] = Palette[colorValue].r;
                 framebuffer[framebufferIndex + 1] = Palette[colorValue].g;
@@ -248,7 +248,7 @@ namespace CoreBoy.Core.Processors
             colorIndex |= (byte)((byte1 >> (7 - x)) & 1);
             colorIndex |= (byte)(((byte2 >> (7 - x)) & 1) << 1);
 
-            byte currentPalette = State.Io[GraphicsIO.BGP].Value;
+            byte currentPalette = State.Io[GraphicsIo.BGP].Value;
             byte high = 0, low = 0;
 
             switch (colorIndex)
@@ -269,8 +269,6 @@ namespace CoreBoy.Core.Processors
                     high = 7;
                     low = 6;
                     break;
-                default:
-                    break;
             }
 
             byte colorValue = 0;
@@ -285,15 +283,15 @@ namespace CoreBoy.Core.Processors
             get
             {
                 byte state = 0x0;
-                state = state.SetBit(0, State.Io[GraphicsIO.STAT][LCDStatus.ScreenModeLow]);
-                state = state.SetBit(1, State.Io[GraphicsIO.STAT][LCDStatus.ScreenModeHigh]);
+                state = state.SetBit(0, State.Io[GraphicsIo.STAT][LcdStatus.ScreenModeLow]);
+                state = state.SetBit(1, State.Io[GraphicsIo.STAT][LcdStatus.ScreenModeHigh]);
                 return (ScreenMode)state;
             }
             set
             {
                 var state = (byte)value;
-                State.Io[GraphicsIO.STAT].LockBit(LCDStatus.ScreenModeLow, state.GetBit(0));
-                State.Io[GraphicsIO.STAT].LockBit(LCDStatus.ScreenModeHigh, state.GetBit(1));
+                State.Io[GraphicsIo.STAT].LockBit(LcdStatus.ScreenModeLow, state.GetBit(0));
+                State.Io[GraphicsIo.STAT].LockBit(LcdStatus.ScreenModeHigh, state.GetBit(1));
             }
         }
 
@@ -316,7 +314,7 @@ namespace CoreBoy.Core.Processors
         public PpuState()
         {
             Io.Populate(() => new MemoryCell());
-            Io[GraphicsIO.STAT].LockBit(LCDStatus.Unused, true);
+            Io[GraphicsIo.STAT].LockBit(LcdStatus.Unused, true);
 
             var random = new Random();
             random.NextBytes(Vram);

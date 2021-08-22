@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
 {
-    public class Mmu : IMmu
+    public sealed class Mmu : IMmu
     {
         public MmuState State { get; set; }
 
@@ -29,7 +29,7 @@ namespace CoreBoy.Core.Processors
             State = new MmuState();
         }
 
-        public virtual byte this[ushort address]
+        public byte this[ushort address]
         {
             get
             {
@@ -74,7 +74,7 @@ namespace CoreBoy.Core.Processors
                 // [FF00-FF7F] Memory-mapped I/O
                 else if (address < 0xFF80)
                 {
-                    if (address >= 0xFF40 && address <= 0xFF4B)
+                    if (address is >= 0xFF40 and <= 0xFF4B)
                     {
                         return ppu[address];
                     }
@@ -129,7 +129,7 @@ namespace CoreBoy.Core.Processors
                 // [FF00-FF7F] Memory-mapped I/O
                 else if (address < 0xFF80)
                 {
-                    if (address >= 0xFF40 && address <= 0xFF4B)
+                    if (address is >= 0xFF40 and <= 0xFF4B)
                     {
                         ppu[address] = value;
                         return;
@@ -163,7 +163,7 @@ namespace CoreBoy.Core.Processors
             cartridge = cartridgeIn;
         }
 
-        public virtual void UpdateState(long cycles)
+        public void UpdateState(long cycles)
         {
             ppu.UpdateState(cycles);
         }
