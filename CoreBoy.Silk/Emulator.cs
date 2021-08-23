@@ -95,16 +95,19 @@ namespace CoreBoy.Silk
 
         private void OnClose()
         {
+            Dispose();
+        }
+        
+        public void Dispose()
+        {
+            gameBoy.PowerOff();
+            emulatorThread.Join();
+            
             vbo.Dispose();
             ebo.Dispose();
             vao.Dispose();
             shader.Dispose();
             texture.Dispose();
-        }
-        
-        public void Dispose()
-        {
-            window.Close();
         }
 
         private void KeyDown(IKeyboard arg1, Key arg2, int arg3)
