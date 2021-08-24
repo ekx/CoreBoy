@@ -115,6 +115,12 @@ namespace CoreBoy.Core.Processors
             }
         }
 
+        private void Reset(ushort address)
+        {
+            Push(State.Pc);
+            State.Pc = address;
+        }
+
         public void Add(byte value, bool carry)
         {
             var result = State.Af.High + value;
@@ -204,10 +210,53 @@ namespace CoreBoy.Core.Processors
             SetFlag(RegisterFlag.H, false);
             SetFlag(RegisterFlag.C, false);
         }
-
+        
         private void Compare(byte value)
         {
             Subtract(value, false, false);
+        }
+
+        private void DecimalAdjustA()
+        {
+            byte correction = 0;
+            
+            if (GetFlag(RegisterFlag.H) || !GetFlag(RegisterFlag.N) && (State.Af.High & 0xf) > 0x9)
+            {
+                correction |= 0x6;
+            }
+            
+            if (GetFlag(RegisterFlag.C) || !GetFlag(RegisterFlag.N) && State.Af.High > 0x99)
+            {
+                correction |= 0x60;
+                SetFlag(RegisterFlag.C, true);
+            }
+
+            State.Af.High = (byte)(State.Af.High + (GetFlag(RegisterFlag.N) ? -correction : correction));
+            
+            SetFlag(RegisterFlag.Z, State.Af.High == 0x0);
+            SetFlag(RegisterFlag.H, false);
+        }
+
+        private void ComplementA()
+        {
+            State.Af.High = (byte)~State.Af.High;
+            
+            SetFlag(RegisterFlag.N, true);
+            SetFlag(RegisterFlag.H, true);
+        }
+        
+        private void ComplementCarryFlag()
+        {
+            SetFlag(RegisterFlag.N, false);
+            SetFlag(RegisterFlag.H, false);
+            SetFlag(RegisterFlag.C, !GetFlag(RegisterFlag.C));
+        }
+
+        private void SetCarryFlag()
+        {
+            SetFlag(RegisterFlag.N, false);
+            SetFlag(RegisterFlag.H, false);
+            SetFlag(RegisterFlag.C, true);
         }
 
         #region CB instructions
@@ -260,11 +309,52 @@ namespace CoreBoy.Core.Processors
             WriteByte(address, value);
         }
 
+        private void Swap(ref RegisterByte target)
+        {
+            target = (byte) ((target & 0x0F) << 4 | (target & 0xF0) >> 4);
+            
+            SetFlag(RegisterFlag.Z, target == 0);
+            SetFlag(RegisterFlag.N, false);
+            SetFlag(RegisterFlag.H, false);
+            SetFlag(RegisterFlag.C, false);
+        }
+
+        private void Swap(ushort address)
+        {
+            RegisterByte value = ReadByte(address);
+            Swap(ref value);
+            WriteByte(address, value);
+        }
+        
         private void TestBit(byte value, int bitIndex)
         {
             SetFlag(RegisterFlag.Z, !value.GetBit(bitIndex));
             SetFlag(RegisterFlag.N, false);
             SetFlag(RegisterFlag.H, true);
+        }
+
+        private void ResetBit(ref RegisterByte target, int bitIndex)
+        {
+            target[bitIndex] = false;
+        }
+        
+        private void ResetBit(ushort address, int bitIndex)
+        {
+            RegisterByte value = ReadByte(address);
+            ResetBit(ref value, bitIndex);
+            WriteByte(address, value);
+        }
+        
+        private void SetBit(ref RegisterByte target, int bitIndex)
+        {
+            target[bitIndex] = true;
+        }
+        
+        private void SetBit(ushort address, int bitIndex)
+        {
+            RegisterByte value = ReadByte(address);
+            SetBit(ref value, bitIndex);
+            WriteByte(address, value);
         }
 
         #endregion

@@ -193,14 +193,24 @@ namespace CoreBoy.Core.Processors
             {
                 RenderBackground();
             }
+
+            if (State.Io[GraphicsIo.LCDC][LcdControl.WindowEnabled])
+            {
+                RenderWindow();
+            }
+
+            if (State.Io[GraphicsIo.LCDC][LcdControl.SpritesEnabled])
+            {
+                RenderSprites();
+            }
         }
 
         private void RenderBackground()
         {
-            byte x = State.Io[GraphicsIo.SCX].Value;
-            byte y = (byte)((State.Io[GraphicsIo.LY].Value + State.Io[GraphicsIo.SCY].Value) & 0xFF);
+            var x = State.Io[GraphicsIo.SCX].Value;
+            var y = (byte)((State.Io[GraphicsIo.LY].Value + State.Io[GraphicsIo.SCY].Value) & 0xFF);
 
-            ushort tileMapOffset = State.Io[GraphicsIo.LCDC][LcdControl.BgTileMap] ? (ushort)0x9C00 : (ushort)0x9800;
+            var tileMapOffset = State.Io[GraphicsIo.LCDC][LcdControl.BgTileMap] ? (ushort)0x9C00 : (ushort)0x9800;
 
             RenderToFramebuffer(x, y, tileMapOffset);
         }
@@ -209,7 +219,7 @@ namespace CoreBoy.Core.Processors
         {
             // TODO: Should be cleaned up & performance improved
             var tileDataOffset = State.Io[GraphicsIo.LCDC][LcdControl.TileSet] ? (ushort)0x8000 : (ushort)0x8800;
-            var mapOffset = (tileDataOffset == 0x8800) ? 128 : 0;
+            var mapOffset = tileDataOffset == 0x8800 ? 128 : 0;
 
             for (var i = 0; i < Graphics.ScreenWidth; i++)
             {
@@ -240,6 +250,16 @@ namespace CoreBoy.Core.Processors
 
                 x++;
             }
+        }
+
+        private void RenderWindow()
+        {
+            
+        }
+
+        private void RenderSprites()
+        {
+            
         }
 
         private byte CalculatePixelValue(byte byte1, byte byte2, int x)
@@ -299,7 +319,7 @@ namespace CoreBoy.Core.Processors
 
         private readonly ILogger log;
 
-        private static readonly Dictionary<byte, (byte r, byte g, byte b)> Palette = new Dictionary<byte, (byte r, byte g, byte b)>
+        private static readonly Dictionary<byte, (byte r, byte g, byte b)> Palette = new()
         {
             [3] = (0, 0, 0),
             [2] = (85, 85, 85),

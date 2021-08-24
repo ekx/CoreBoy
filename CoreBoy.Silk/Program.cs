@@ -1,5 +1,5 @@
 ﻿using System;
-using CoreBoy.Core;
+using CoreBoy.Core.Utils;
 
 namespace CoreBoy.Silk
 {
@@ -8,7 +8,7 @@ namespace CoreBoy.Silk
         [STAThread]
         public static void Main(string[] args)
         {
-            using var emulator = new Emulator((int) (GameBoy.ScreenWidth * 2), (int) (GameBoy.ScreenHeight * 2), "CoreBoy");
+            using var emulator = new Emulator(Graphics.ScreenWidth * 2, Graphics.ScreenHeight * 2, "CoreBoy");
             emulator.Run();
         }
     }

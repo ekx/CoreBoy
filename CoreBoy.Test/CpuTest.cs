@@ -443,7 +443,7 @@ namespace CoreBoy.Test
 
         #endregion
 
-        #region Call Return
+        #region Call Return Reset
 
         [TestMethod]
         public void Call()
@@ -472,6 +472,22 @@ namespace CoreBoy.Test
 
             Assert.AreEqual(0x14, cpu.State.Sp.Value);
             Assert.AreEqual(0x1312, cpu.State.Pc.Value);
+            Assert.AreEqual(16, cpu.State.Clock);
+        }
+        
+        [TestMethod]
+        public void Reset()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xC7;
+            cpu.State.Sp = 0x12;
+
+            cpu.RunInstructionCycle();
+
+            mmu.VerifySet(m => m[0x0011] = 0x00, Times.Once());
+            mmu.VerifySet(m => m[0x0010] = 0xC8, Times.Once());
+            Assert.AreEqual(0x10, cpu.State.Sp.Value);
+            Assert.AreEqual(0x00, cpu.State.Pc.Value);
             Assert.AreEqual(16, cpu.State.Clock);
         }
 
@@ -821,6 +837,70 @@ namespace CoreBoy.Test
 
         #endregion
 
+        #region Misc
+
+        [TestMethod]
+        public void DecimalAdjustA()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0x27;
+            cpu.State.Af.High.Value = 0b0000_1010;
+            cpu.State.Af.Low.Value = 0b0010_0000;
+
+            cpu.RunInstructionCycle();
+
+            Assert.AreEqual(0b0001_0000, cpu.State.Af.High.Value);
+            Assert.AreEqual(0x00, cpu.State.Af.Low.Value);
+            Assert.AreEqual(0x28, cpu.State.Pc.Value);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+        
+        [TestMethod]
+        public void ComplementA()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0x2F;
+            cpu.State.Af.High.Value = 0b0010_0110;
+            cpu.State.Af.Low.Value = 0b0000_0000;
+
+            cpu.RunInstructionCycle();
+
+            Assert.AreEqual(0b1101_1001, cpu.State.Af.High.Value);
+            Assert.AreEqual(0b0110_0000, cpu.State.Af.Low.Value);
+            Assert.AreEqual(0x30, cpu.State.Pc.Value);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+        
+        [TestMethod]
+        public void ComplementCarryFlag()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0x3F;
+            cpu.State.Af.Low.Value = 0b0111_0000;
+
+            cpu.RunInstructionCycle();
+
+            Assert.AreEqual(0b0000_0000, cpu.State.Af.Low.Value);
+            Assert.AreEqual(0x40, cpu.State.Pc.Value);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void SetCarryFlag()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0x37;
+            cpu.State.Af.Low.Value = 0b0110_0000;
+
+            cpu.RunInstructionCycle();
+
+            Assert.AreEqual(0b0001_0000, cpu.State.Af.Low.Value);
+            Assert.AreEqual(0x38, cpu.State.Pc.Value);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+        
+        #endregion
+        
         #region RotateLeft
 
         [TestMethod]
@@ -957,6 +1037,45 @@ namespace CoreBoy.Test
 
         #endregion
 
+        #region Swap
+        
+        #endregion
+
+        [TestMethod]
+        public void TestSwapRegister()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xCB;
+            mmu.Setup(m => m[0x00CC]).Returns(0x30);
+            cpu.State.Bc.High.Value = 0b1100_0011;
+            cpu.State.Af.Low.Value = 0b0111_0000;
+
+            cpu.RunInstructionCycle();
+
+            Assert.AreEqual(0b0011_1100, cpu.State.Bc.High.Value);
+            Assert.AreEqual(0b0000_0000, cpu.State.Af.Low.Value);
+            Assert.AreEqual(0xCD, cpu.State.Pc.Value);
+            Assert.AreEqual(8, cpu.State.Clock);
+        }
+        
+        [TestMethod]
+        public void TestSwapMemory()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xCB;
+            mmu.Setup(m => m[0x00CC]).Returns(0x36);
+            mmu.Setup(m => m[0x1255]).Returns(0b1100_0011);
+            cpu.State.Af.Low = 0b0111_0000;
+            cpu.State.Hl = 0x1255;
+
+            cpu.RunInstructionCycle();
+
+            mmu.VerifySet(m => m[0x1255] = 0b0011_1100, Times.Once());
+            Assert.AreEqual(0b0000_0000, cpu.State.Af.Low.Value);
+            Assert.AreEqual(0xCD, cpu.State.Pc.Value);
+            Assert.AreEqual(16, cpu.State.Clock);
+        }
+        
         #region Bit
 
         [TestMethod]
@@ -987,6 +1106,68 @@ namespace CoreBoy.Test
             Assert.AreEqual(0xA0, cpu.State.Af.Low.Value);
             Assert.AreEqual(0xCD, cpu.State.Pc.Value);
             Assert.AreEqual(12, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void ResetBitRegister()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xCB;
+            mmu.Setup(m => m[0x00CC]).Returns(0x80);
+            cpu.State.Bc.High.Value = 0b1111_1111;
+
+            cpu.RunInstructionCycle();
+
+            Assert.AreEqual(0b1111_1110, cpu.State.Bc.High.Value);
+            Assert.AreEqual(0xCD, cpu.State.Pc.Value);
+            Assert.AreEqual(8, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void ResetBitMemory()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xCB;
+            mmu.Setup(m => m[0x00CC]).Returns(0x86);
+            cpu.State.Hl = 0x1234;
+            mmu.Setup(m => m[0x1234]).Returns(0b1111_1111);
+
+            cpu.RunInstructionCycle();
+
+            mmu.VerifySet(m => m[0x1234] = 0b1111_1110, Times.Once());
+            Assert.AreEqual(0xCD, cpu.State.Pc.Value);
+            Assert.AreEqual(16, cpu.State.Clock);
+        }
+        
+        [TestMethod]
+        public void SetBitRegister()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xCB;
+            mmu.Setup(m => m[0x00CC]).Returns(0xC0);
+            cpu.State.Bc.High.Value = 0b0000_0000;
+
+            cpu.RunInstructionCycle();
+
+            Assert.AreEqual(0b0000_0001, cpu.State.Bc.High.Value);
+            Assert.AreEqual(0xCD, cpu.State.Pc.Value);
+            Assert.AreEqual(8, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void SetBitMemory()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xCB;
+            mmu.Setup(m => m[0x00CC]).Returns(0xC6);
+            cpu.State.Hl = 0x1234;
+            mmu.Setup(m => m[0x1234]).Returns(0b0000_0000);
+
+            cpu.RunInstructionCycle();
+
+            mmu.VerifySet(m => m[0x1234] = 0b0000_0001, Times.Once());
+            Assert.AreEqual(0xCD, cpu.State.Pc.Value);
+            Assert.AreEqual(16, cpu.State.Clock);
         }
 
         #endregion

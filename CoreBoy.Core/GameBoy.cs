@@ -12,9 +12,6 @@ namespace CoreBoy.Core
 {
     public class GameBoy
     {
-        public const uint ScreenWidth = 160;
-        public const uint ScreenHeight = 144;
-
         public event RenderFramebufferDelegate RenderFramebufferHandler
         {
             add => ppu.RenderFramebufferHandler += value;

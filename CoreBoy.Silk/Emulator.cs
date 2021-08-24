@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using CoreBoy.Core;
+using CoreBoy.Core.Utils;
 using CoreBoy.Silk.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -69,9 +70,7 @@ namespace CoreBoy.Silk
             vao.VertexAttributePointer(1, 2, VertexAttribPointerType.Float, 5, 3);
 
             shader = new Shader(gl, Path.Combine("Shader", "shader.vert"), Path.Combine("Shader", "shader.frag"));
-
-            //Loading a texture.
-            texture = new Texture(gl, Span<byte>.Empty, GameBoy.ScreenWidth, GameBoy.ScreenHeight);
+            texture = new Texture(gl, Span<byte>.Empty, default, default);
         }
 
         private unsafe void OnRender(double obj)
@@ -83,10 +82,9 @@ namespace CoreBoy.Silk
 
             if (framebufferChanged)
             {
-                texture = new Texture(gl, framebuffer, GameBoy.ScreenWidth, GameBoy.ScreenHeight);
+                texture = new Texture(gl, framebuffer, Graphics.ScreenWidth, Graphics.ScreenHeight);
             }
             
-            //Bind a texture and and set the uTexture0 to use texture0.
             texture.Bind();
             shader.SetUniform("uTexture0", 0);
 
@@ -143,7 +141,6 @@ namespace CoreBoy.Silk
         private BufferObject<uint> ebo;
         private VertexArrayObject<float, uint> vao;
         
-        //Create a texture object.
         private Texture texture;
         private Shader shader;
         

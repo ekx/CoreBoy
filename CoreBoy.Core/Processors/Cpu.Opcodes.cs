@@ -207,6 +207,16 @@ namespace CoreBoy.Core.Processors
                 { 0xD0, () => { Return(!GetFlag(RegisterFlag.C)); } },                                  // RET NC
                 { 0xD8, () => { Return(GetFlag(RegisterFlag.C)); } },                                   // RET C
 
+                // Reset
+                { 0xC7, () => { Reset(0x0000); } },                                               // RST 00
+                { 0xCF, () => { Reset(0x0008); } },                                               // RST 08
+                { 0xD7, () => { Reset(0x0010); } },                                               // RST 10
+                { 0xDF, () => { Reset(0x0018); } },                                               // RST 18
+                { 0xE7, () => { Reset(0x0020); } },                                               // RST 20
+                { 0xEF, () => { Reset(0x0028); } },                                               // RST 28
+                { 0xF7, () => { Reset(0x0030); } },                                               // RST 30
+                { 0xFF, () => { Reset(0x0038); } },                                               // RST 38
+                
                 // Adds
                 { 0x80, () => { Add(State.Bc.High, false); } },                                         // ADD A, B
                 { 0x81, () => { Add(State.Bc.Low, false); } },                                          // ADD A, C
@@ -299,6 +309,12 @@ namespace CoreBoy.Core.Processors
                 { 0xBF, () => { Compare(State.Af.High); } },                                            // CP A
                 { 0xFE, () => { Compare(ReadByte(State.Pc++)); } },                                     // CP #
 
+                // Misc
+                { 0x27, DecimalAdjustA },                                                                   // DAA
+                { 0x2F, ComplementA },                                                                      // CPL
+                { 0x3F, ComplementCarryFlag },                                                              // CCF
+                { 0x37, SetCarryFlag },                                                                     // SCF
+                
                 // Rotates
                 { 0x07, () => { RotateLeft(ref State.Af.High, true); } },                               // RLCA
                 { 0x17, () => { RotateLeft(ref State.Af.High, false); } },                              // RLA
@@ -380,6 +396,16 @@ namespace CoreBoy.Core.Processors
                 { 0x1E, () => { RotateRight(State.Hl, false); } },                                    // RR (HL)
                 { 0x1F, () => { RotateRight(ref State.Af.High, false); } },                             // RR A
 
+                // Swap
+                { 0x30, () => { Swap(ref State.Bc.High); } },                                               // SWAP B
+                { 0x31, () => { Swap(ref State.Bc.Low); } },                                                // SWAP C
+                { 0x32, () => { Swap(ref State.De.High); } },                                               // SWAP D
+                { 0x33, () => { Swap(ref State.De.Low); } },                                                // SWAP E
+                { 0x34, () => { Swap(ref State.Hl.High); } },                                               // SWAP H
+                { 0x35, () => { Swap(ref State.Hl.Low); } },                                                // SWAP L
+                { 0x36, () => { Swap(State.Hl); } },                                                      // SWAP (HL)
+                { 0x37, () => { Swap(ref State.Af.High); } },                                               // SWAP A
+                
                 // Bit
                 { 0x40, () => { TestBit(State.Bc.High, 0); } },									    // BIT 0, B
                 { 0x41, () => { TestBit(State.Bc.Low, 0); } },											// BIT 0, C
@@ -451,7 +477,151 @@ namespace CoreBoy.Core.Processors
                 { 0x7C, () => { TestBit(State.Hl.High, 7); } },										// BIT 7, H
                 { 0x7D, () => { TestBit(State.Hl.Low, 7); } },											// BIT 7, L
                 { 0x7E, () => { TestBit(ReadByte(State.Hl), 7); } },								// BIT 7, (HL)
-                { 0x7F, () => { TestBit(State.Af.High, 7); } }										    // BIT 7, A
+                { 0x7F, () => { TestBit(State.Af.High, 7); } },										// BIT 7, A
+                
+                { 0x80, () => { ResetBit(ref State.Bc.High, 0); } },                                     // RES 0, B
+                { 0x81, () => { ResetBit(ref State.Bc.Low, 0); } },                                      // RES 0, C
+                { 0x82, () => { ResetBit(ref State.De.High, 0); } },                                     // RES 0, D
+                { 0x83, () => { ResetBit(ref State.De.Low, 0); } },                                      // RES 0, E
+                { 0x84, () => { ResetBit(ref State.Hl.High, 0); } },                                     // RES 0, H
+                { 0x85, () => { ResetBit(ref State.Hl.Low, 0); } },                                      // RES 0, L
+                { 0x86, () => { ResetBit(State.Hl, 0); } },                                            // RES 0, (HL)
+                { 0x87, () => { ResetBit(ref State.Af.High, 0); } },                                     // RES 0, A
+                
+                { 0x88, () => { ResetBit(ref State.Bc.High, 1); } },                                     // RES 1, B
+                { 0x89, () => { ResetBit(ref State.Bc.Low, 1); } },                                      // RES 1, C
+                { 0x8A, () => { ResetBit(ref State.De.High, 1); } },                                     // RES 1, D
+                { 0x8B, () => { ResetBit(ref State.De.Low, 1); } },                                      // RES 1, E
+                { 0x8C, () => { ResetBit(ref State.Hl.High, 1); } },                                     // RES 1, H
+                { 0x8D, () => { ResetBit(ref State.Hl.Low, 1); } },                                      // RES 1, L
+                { 0x8E, () => { ResetBit(State.Hl, 1); } },                                            // RES 1, (HL)
+                { 0x8F, () => { ResetBit(ref State.Af.High, 1); } },                                     // RES 1, A
+                
+                { 0x90, () => { ResetBit(ref State.Bc.High, 2); } },                                     // RES 2, B
+                { 0x91, () => { ResetBit(ref State.Bc.Low, 2); } },                                      // RES 2, C
+                { 0x92, () => { ResetBit(ref State.De.High, 2); } },                                     // RES 2, D
+                { 0x93, () => { ResetBit(ref State.De.Low, 2); } },                                      // RES 2, E
+                { 0x94, () => { ResetBit(ref State.Hl.High, 2); } },                                     // RES 2, H
+                { 0x95, () => { ResetBit(ref State.Hl.Low, 2); } },                                      // RES 2, L
+                { 0x96, () => { ResetBit(State.Hl, 2); } },                                            // RES 2, (HL)
+                { 0x97, () => { ResetBit(ref State.Af.High, 2); } },                                     // RES 2, A
+                
+                { 0x98, () => { ResetBit(ref State.Bc.High, 3); } },                                     // RES 3, B
+                { 0x99, () => { ResetBit(ref State.Bc.Low, 3); } },                                      // RES 3, C
+                { 0x9A, () => { ResetBit(ref State.De.High, 3); } },                                     // RES 3, D
+                { 0x9B, () => { ResetBit(ref State.De.Low, 3); } },                                      // RES 3, E
+                { 0x9C, () => { ResetBit(ref State.Hl.High, 3); } },                                     // RES 3, H
+                { 0x9D, () => { ResetBit(ref State.Hl.Low, 3); } },                                      // RES 3, L
+                { 0x9E, () => { ResetBit(State.Hl, 3); } },                                            // RES 3, (HL)
+                { 0x9F, () => { ResetBit(ref State.Af.High, 3); } },                                     // RES 3, A
+                
+                { 0xA0, () => { ResetBit(ref State.Bc.High, 4); } },                                     // RES 4, B
+                { 0xA1, () => { ResetBit(ref State.Bc.Low, 4); } },                                      // RES 4, C
+                { 0xA2, () => { ResetBit(ref State.De.High, 4); } },                                     // RES 4, D
+                { 0xA3, () => { ResetBit(ref State.De.Low, 4); } },                                      // RES 4, E
+                { 0xA4, () => { ResetBit(ref State.Hl.High, 4); } },                                     // RES 4, H
+                { 0xA5, () => { ResetBit(ref State.Hl.Low, 4); } },                                      // RES 4, L
+                { 0xA6, () => { ResetBit(State.Hl, 4); } },                                            // RES 4, (HL)
+                { 0xA7, () => { ResetBit(ref State.Af.High, 4); } },                                     // RES 4, A
+                
+                { 0xA8, () => { ResetBit(ref State.Bc.High, 5); } },                                     // RES 5, B
+                { 0xA9, () => { ResetBit(ref State.Bc.Low, 5); } },                                      // RES 5, C
+                { 0xAA, () => { ResetBit(ref State.De.High, 5); } },                                     // RES 5, D
+                { 0xAB, () => { ResetBit(ref State.De.Low, 5); } },                                      // RES 5, E
+                { 0xAC, () => { ResetBit(ref State.Hl.High, 5); } },                                     // RES 5, H
+                { 0xAD, () => { ResetBit(ref State.Hl.Low, 5); } },                                      // RES 5, L
+                { 0xAE, () => { ResetBit(State.Hl, 5); } },                                            // RES 5, (HL)
+                { 0xAF, () => { ResetBit(ref State.Af.High, 5); } },                                     // RES 5, A
+                
+                { 0xB0, () => { ResetBit(ref State.Bc.High, 6); } },                                     // RES 6, B
+                { 0xB1, () => { ResetBit(ref State.Bc.Low, 6); } },                                      // RES 6, C
+                { 0xB2, () => { ResetBit(ref State.De.High, 6); } },                                     // RES 6, D
+                { 0xB3, () => { ResetBit(ref State.De.Low, 6); } },                                      // RES 6, E
+                { 0xB4, () => { ResetBit(ref State.Hl.High, 6); } },                                     // RES 6, H
+                { 0xB5, () => { ResetBit(ref State.Hl.Low, 6); } },                                      // RES 6, L
+                { 0xB6, () => { ResetBit(State.Hl, 6); } },                                            // RES 6, (HL)
+                { 0xB7, () => { ResetBit(ref State.Af.High, 6); } },                                     // RES 6, A
+                
+                { 0xB8, () => { ResetBit(ref State.Bc.High, 7); } },                                     // RES 7, B
+                { 0xB9, () => { ResetBit(ref State.Bc.Low, 7); } },                                      // RES 7, C
+                { 0xBA, () => { ResetBit(ref State.De.High, 7); } },                                     // RES 7, D
+                { 0xBB, () => { ResetBit(ref State.De.Low, 7); } },                                      // RES 7, E
+                { 0xBC, () => { ResetBit(ref State.Hl.High, 7); } },                                     // RES 7, H
+                { 0xBD, () => { ResetBit(ref State.Hl.Low, 7); } },                                      // RES 7, L
+                { 0xBE, () => { ResetBit(State.Hl, 7); } },                                            // RES 7, (HL)
+                { 0xBF, () => { ResetBit(ref State.Af.High, 7); } },                                     // RES 7, A
+                
+                { 0xC0, () => { SetBit(ref State.Bc.High, 0); } },                                       // SET 0, B
+                { 0xC1, () => { SetBit(ref State.Bc.Low, 0); } },                                        // SET 0, C
+                { 0xC2, () => { SetBit(ref State.De.High, 0); } },                                       // SET 0, D
+                { 0xC3, () => { SetBit(ref State.De.Low, 0); } },                                        // SET 0, E
+                { 0xC4, () => { SetBit(ref State.Hl.High, 0); } },                                       // SET 0, H
+                { 0xC5, () => { SetBit(ref State.Hl.Low, 0); } },                                        // SET 0, L
+                { 0xC6, () => { SetBit(State.Hl, 0); } },                                              // SET 0, (HL)
+                { 0xC7, () => { SetBit(ref State.Af.High, 0); } },                                       // SET 0, A
+                
+                { 0xC8, () => { SetBit(ref State.Bc.High, 1); } },                                       // SET 1, B
+                { 0xC9, () => { SetBit(ref State.Bc.Low, 1); } },                                        // SET 1, C
+                { 0xCA, () => { SetBit(ref State.De.High, 1); } },                                       // SET 1, D
+                { 0xCB, () => { SetBit(ref State.De.Low, 1); } },                                        // SET 1, E
+                { 0xCC, () => { SetBit(ref State.Hl.High, 1); } },                                       // SET 1, H
+                { 0xCD, () => { SetBit(ref State.Hl.Low, 1); } },                                        // SET 1, L
+                { 0xCE, () => { SetBit(State.Hl, 1); } },                                              // SET 1, (HL)
+                { 0xCF, () => { SetBit(ref State.Af.High, 1); } },                                       // SET 1, A
+                
+                { 0xD0, () => { SetBit(ref State.Bc.High, 2); } },                                       // SET 2, B
+                { 0xD1, () => { SetBit(ref State.Bc.Low, 2); } },                                        // SET 2, C
+                { 0xD2, () => { SetBit(ref State.De.High, 2); } },                                       // SET 2, D
+                { 0xD3, () => { SetBit(ref State.De.Low, 2); } },                                        // SET 2, E
+                { 0xD4, () => { SetBit(ref State.Hl.High, 2); } },                                       // SET 2, H
+                { 0xD5, () => { SetBit(ref State.Hl.Low, 2); } },                                        // SET 2, L
+                { 0xD6, () => { SetBit(State.Hl, 2); } },                                              // SET 2, (HL)
+                { 0xD7, () => { SetBit(ref State.Af.High, 2); } },                                       // SET 2, A
+                
+                { 0xD8, () => { SetBit(ref State.Bc.High, 3); } },                                       // SET 3, B
+                { 0xD9, () => { SetBit(ref State.Bc.Low, 3); } },                                        // SET 3, C
+                { 0xDA, () => { SetBit(ref State.De.High, 3); } },                                       // SET 3, D
+                { 0xDB, () => { SetBit(ref State.De.Low, 3); } },                                        // SET 3, E
+                { 0xDC, () => { SetBit(ref State.Hl.High, 3); } },                                       // SET 3, H
+                { 0xDD, () => { SetBit(ref State.Hl.Low, 3); } },                                        // SET 3, L
+                { 0xDE, () => { SetBit(State.Hl, 3); } },                                              // SET 3, (HL)
+                { 0xDF, () => { SetBit(ref State.Af.High, 3); } },                                       // SET 3, A
+                
+                { 0xE0, () => { SetBit(ref State.Bc.High, 4); } },                                       // SET 4, B
+                { 0xE1, () => { SetBit(ref State.Bc.Low, 4); } },                                        // SET 4, C
+                { 0xE2, () => { SetBit(ref State.De.High, 4); } },                                       // SET 4, D
+                { 0xE3, () => { SetBit(ref State.De.Low, 4); } },                                        // SET 4, E
+                { 0xE4, () => { SetBit(ref State.Hl.High, 4); } },                                       // SET 4, H
+                { 0xE5, () => { SetBit(ref State.Hl.Low, 4); } },                                        // SET 4, L
+                { 0xE6, () => { SetBit(State.Hl, 4); } },                                              // SET 4, (HL)
+                { 0xE7, () => { SetBit(ref State.Af.High, 4); } },                                       // SET 4, A
+                
+                { 0xE8, () => { SetBit(ref State.Bc.High, 5); } },                                       // SET 5, B
+                { 0xE9, () => { SetBit(ref State.Bc.Low, 5); } },                                        // SET 5, C
+                { 0xEA, () => { SetBit(ref State.De.High, 5); } },                                       // SET 5, D
+                { 0xEB, () => { SetBit(ref State.De.Low, 5); } },                                        // SET 5, E
+                { 0xEC, () => { SetBit(ref State.Hl.High, 5); } },                                       // SET 5, H
+                { 0xED, () => { SetBit(ref State.Hl.Low, 5); } },                                        // SET 5, L
+                { 0xEE, () => { SetBit(State.Hl, 5); } },                                              // SET 5, (HL)
+                { 0xEF, () => { SetBit(ref State.Af.High, 5); } },                                       // SET 5, A
+                
+                { 0xF0, () => { SetBit(ref State.Bc.High, 6); } },                                       // SET 6, B
+                { 0xF1, () => { SetBit(ref State.Bc.Low, 6); } },                                        // SET 6, C
+                { 0xF2, () => { SetBit(ref State.De.High, 6); } },                                       // SET 6, D
+                { 0xF3, () => { SetBit(ref State.De.Low, 6); } },                                        // SET 6, E
+                { 0xF4, () => { SetBit(ref State.Hl.High, 6); } },                                       // SET 6, H
+                { 0xF5, () => { SetBit(ref State.Hl.Low, 6); } },                                        // SET 6, L
+                { 0xF6, () => { SetBit(State.Hl, 6); } },                                              // SET 6, (HL)
+                { 0xF7, () => { SetBit(ref State.Af.High, 6); } },                                       // SET 6, A
+                
+                { 0xF8, () => { SetBit(ref State.Bc.High, 7); } },                                       // SET 7, B
+                { 0xF9, () => { SetBit(ref State.Bc.Low, 7); } },                                        // SET 7, C
+                { 0xFA, () => { SetBit(ref State.De.High, 7); } },                                       // SET 7, D
+                { 0xFB, () => { SetBit(ref State.De.Low, 7); } },                                        // SET 7, E
+                { 0xFC, () => { SetBit(ref State.Hl.High, 7); } },                                       // SET 7, H
+                { 0xFD, () => { SetBit(ref State.Hl.Low, 7); } },                                        // SET 7, L
+                { 0xFE, () => { SetBit(State.Hl, 7); } },                                              // SET 7, (HL)
+                { 0xFF, () => { SetBit(ref State.Af.High, 7); } },                                       // SET 7, A
             };
         }
 
