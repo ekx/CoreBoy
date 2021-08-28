@@ -48,6 +48,14 @@ namespace CoreBoy.Core.Utils
             value = value.SetBit(index, valueIn);
         }
 
+        public void LockBits(int startIndex, int numberOfBits, bool value)
+        {
+            for (var i = startIndex; i < startIndex + numberOfBits; i++)
+            {
+                LockBit(i, value);
+            }
+        }
+
         public override string ToString()
         {
             return $"Value: {Convert.ToString(Value, 2)}";

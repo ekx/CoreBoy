@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace CoreBoy.Core.Processors
 {
@@ -30,7 +28,7 @@ namespace CoreBoy.Core.Processors
 
         public void UpdateState(long cycles)
         {
-            throw new NotImplementedException();
+            
         }
 
         private readonly ILogger log;
@@ -42,7 +40,7 @@ namespace CoreBoy.Core.Processors
         public SpuState()
         {
         }
-
-
+        
+        
     }
 }

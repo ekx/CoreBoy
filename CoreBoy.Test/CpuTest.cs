@@ -1,5 +1,7 @@
-﻿using Moq;
+﻿using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
+using Moq;
 using CoreBoy.Core.Processors;
+using CoreBoy.Core.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Extensions.Logging;
 
@@ -17,6 +19,84 @@ namespace CoreBoy.Test
             cpu = new Cpu(Mock.Of<ILogger<Cpu>>(), mmu.Object);
         }
 
+        [TestMethod]
+        public void NoOperation()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0x00;
+
+            cpu.RunInstructionCycle();
+            
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void Stop()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0x10;
+
+            cpu.RunInstructionCycle();
+            
+            Assert.AreEqual(true, cpu.State.Stop);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void Halt()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0x76;
+
+            cpu.RunInstructionCycle();
+            
+            Assert.AreEqual(true, cpu.State.Halt);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void DisableInterrupts()
+        {
+            cpu.Reset();
+            cpu.State.MasterInterruptEnable = true;
+            cpu.State.Pc = 0xF3;
+
+            cpu.RunInstructionCycle();
+            
+            Assert.AreEqual(false, cpu.State.MasterInterruptEnable);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void EnableInterrupts()
+        {
+            cpu.Reset();
+            cpu.State.Pc = 0xFB;
+
+            cpu.RunInstructionCycle();
+            
+            Assert.AreEqual(true, cpu.State.MasterInterruptEnable);
+            Assert.AreEqual(4, cpu.State.Clock);
+        }
+
+        [TestMethod]
+        public void TriggerInterrupt()
+        {
+            cpu.Reset();
+            cpu.State.MasterInterruptEnable = true;
+            cpu.State.Pc = 0x1234;
+            cpu.State.Sp = 0x5678;
+
+            mmu.Raise(m => m.InterruptTriggeredHandler += null, InterruptType.VBlank);
+            
+            mmu.VerifySet(m => m[0x5677] = 0x12, Times.Once());
+            mmu.VerifySet(m => m[0x5676] = 0x34, Times.Once());
+            Assert.AreEqual(0x5676, cpu.State.Sp.Value);
+            Assert.AreEqual(cpu.State.Pc.Value, (ushort)InterruptType.VBlank);
+            Assert.AreEqual(false, cpu.State.MasterInterruptEnable);
+            Assert.AreEqual(20, cpu.State.Clock);
+        }
+        
         #region Loads
 
         // 8-Bit
@@ -1038,8 +1118,6 @@ namespace CoreBoy.Test
         #endregion
 
         #region Swap
-        
-        #endregion
 
         [TestMethod]
         public void TestSwapRegister()
@@ -1075,6 +1153,8 @@ namespace CoreBoy.Test
             Assert.AreEqual(0xCD, cpu.State.Pc.Value);
             Assert.AreEqual(16, cpu.State.Clock);
         }
+        
+        #endregion
         
         #region Bit
 

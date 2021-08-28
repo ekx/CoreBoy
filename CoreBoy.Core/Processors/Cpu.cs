@@ -14,7 +14,9 @@ namespace CoreBoy.Core.Processors
             InitOpcodes();
 
             this.log = log;
-            this.mmu = mmu;           
+            this.mmu = mmu;
+            
+            this.mmu.InterruptTriggeredHandler += OnInterruptTriggered;
         }
 
         public void Reset()
@@ -28,6 +30,8 @@ namespace CoreBoy.Core.Processors
         {
             if (State.Halt || State.Stop)
             {
+                // TODO: Check if this is correct
+                mmu.UpdateState(0);
                 return;
             }
 
@@ -91,10 +95,23 @@ namespace CoreBoy.Core.Processors
         {
             return State.Af.Low[(int)flag];
         }
+        
+        private void OnInterruptTriggered(InterruptType interruptType)
+        {
+            if (!State.MasterInterruptEnable) 
+                return;
+            
+            State.MasterInterruptEnable = false;
 
-        private readonly IMmu mmu;
+            Idle();
+            Idle();
+                
+            Push(State.Pc);
+            State.Pc = (ushort)interruptType;
+        }
 
         private readonly ILogger log;
+        private readonly IMmu mmu;
     }
 
     [DataContract]
@@ -117,6 +134,8 @@ namespace CoreBoy.Core.Processors
         public bool Halt;
         [DataMember]
         public bool Stop;
+        [DataMember]
+        public bool MasterInterruptEnable;
 
         [DataMember]
         public long Clock;

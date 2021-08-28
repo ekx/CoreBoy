@@ -88,4 +88,59 @@
         public const byte ScreenWidth = 160;
         public const byte ScreenHeight = 144;
     }
+
+    public enum InterruptType : ushort
+    {
+        VBlank = 0x0040,
+        LcdStatus = 0x0048,
+        Timer = 0x0050,
+        SerialTransfer = 0x0058,
+        Input = 0x0060
+    }
+
+    public static class MmuIo
+    {
+        public const int P1 = 0x00;
+        public const int SB = 0x01;
+        public const int SC = 0x02;
+
+        public const int DIV = 0x04;
+        public const int TIMA = 0x05;
+        public const int TMA = 0x06;
+        public const int TAC = 0x07;
+
+        public const int IF = 0x0F;
+        public const int BOOT = 0x50;
+        
+        public const int HDMA1 = 0x51;
+        public const int HDMA2 = 0x52;
+        public const int HDMA3 = 0x53;
+        public const int HDMA4 = 0x54;
+        public const int HDMA5 = 0x55;
+
+        public const int IE = 0x80;
+    }
+
+    public static class Boot
+    {
+        public const int BootOff = 0;
+    }
+
+    public static class InterruptEnable
+    {
+        public const int VBlank = 0;
+        public const int LcdStatus = 1;
+        public const int Timer = 2;
+        public const int SerialTransfer = 3;
+        public const int Input = 4;
+    }
+    
+    public static class InterruptFlag
+    {
+        public const int VBlank = 0;
+        public const int LcdStatus = 1;
+        public const int Timer = 2;
+        public const int SerialTransfer = 3;
+        public const int Input = 4;
+    }
 }

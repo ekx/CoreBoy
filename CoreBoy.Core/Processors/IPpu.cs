@@ -5,6 +5,8 @@ namespace CoreBoy.Core.Processors
     public interface IPpu
     {
         event RenderFramebufferDelegate RenderFramebufferHandler;
+        event VBlankInterruptDelegate VBlankInterruptHandler;
+        event LcdStatusInterruptDelegate LcdStatusInterruptHandler;
 
         PpuState State { get; set; }
 

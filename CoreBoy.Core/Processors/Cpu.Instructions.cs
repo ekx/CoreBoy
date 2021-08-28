@@ -1,5 +1,4 @@
 ﻿using CoreBoy.Core.Utils;
-using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
 {
@@ -7,12 +6,13 @@ namespace CoreBoy.Core.Processors
     {
         private void DisableInterrupts()
         {
-            log.LogError("Disable interrupts not implemented");
+            State.MasterInterruptEnable = false;
         }
 
         private void EnableInterrupts()
         {
-            log.LogError("Enable interrupts not implemented");
+            // TODO: Delay enable for one tick
+            State.MasterInterruptEnable = true;
         }
 
         private void LoadSpIntoHl()

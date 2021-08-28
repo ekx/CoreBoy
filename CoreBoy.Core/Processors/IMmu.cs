@@ -1,9 +1,12 @@
 ﻿using CoreBoy.Core.Cartridges;
+using CoreBoy.Core.Utils;
 
 namespace CoreBoy.Core.Processors
 {
     public interface IMmu
     {
+        event InterruptTriggeredDelegate InterruptTriggeredHandler;
+        
         MmuState State { get; set; }
         ICartridgeState CartridgeState { get; set; }
 

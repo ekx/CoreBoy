@@ -7,7 +7,7 @@ namespace CoreBoy.Test
     public class MemoryCellTest
     {
         [TestMethod]
-        public void LockedBits()
+        public void LockedBit()
         {
             var memoryCell = new MemoryCell
             {
@@ -20,6 +20,22 @@ namespace CoreBoy.Test
             memoryCell.Value = 0x00;
 
             Assert.AreEqual(0x04, memoryCell.Value);
+        }
+
+        [TestMethod]
+        public void LockedBits()
+        {
+            var memoryCell = new MemoryCell
+            {
+                Value = 0xFF
+            };
+            
+            Assert.AreEqual(0xFF, memoryCell.Value);
+            
+            memoryCell.LockBits(1, 7, true);
+            memoryCell.Value = 0x00;
+            
+            Assert.AreEqual(0xFE, memoryCell.Value);
         }
     }
 }

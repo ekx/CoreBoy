@@ -9,6 +9,10 @@ namespace CoreBoy.Core.Processors
     public sealed class Ppu : IPpu
     {
         public event RenderFramebufferDelegate RenderFramebufferHandler;
+        
+        public event VBlankInterruptDelegate VBlankInterruptHandler;
+
+        public event LcdStatusInterruptDelegate LcdStatusInterruptHandler;
 
         public PpuState State { get; set; }
         
@@ -131,6 +135,14 @@ namespace CoreBoy.Core.Processors
                 default:
                     throw new ArgumentOutOfRangeException(nameof(ScreenMode), "Invalid screen mode");
             }
+
+            // Update LYC and trigger interrupt if applicable
+            var currentLycSignal = State.Io[GraphicsIo.LY].Value == State.Io[GraphicsIo.LYC].Value;
+            if (currentLycSignal != State.Io[GraphicsIo.STAT][LcdStatus.LycSignal])
+            {
+                State.Io[GraphicsIo.STAT][LcdStatus.LycSignal] = currentLycSignal;
+                if (currentLycSignal) LcdStatusInterruptHandler?.Invoke();
+            }
         }
 
         private void UpdateHBlank()
@@ -140,7 +152,6 @@ namespace CoreBoy.Core.Processors
                 if (State.Io[GraphicsIo.LY].Value == 143)
                 {
                     ScreenMode = ScreenMode.VBlank;
-                    RenderFramebufferHandler?.Invoke(framebuffer);
                 }
                 else
                 {
@@ -309,15 +320,28 @@ namespace CoreBoy.Core.Processors
             }
             set
             {
+                if (value == ScreenMode.VBlank)
+                {
+                    RenderFramebufferHandler?.Invoke(framebuffer);
+                    VBlankInterruptHandler?.Invoke();
+                }
+
+                if (State.Io[GraphicsIo.STAT][LcdStatus.HBlankCheckEnabled] && value == ScreenMode.HBlank
+                    || State.Io[GraphicsIo.STAT][LcdStatus.VBlankCheckEnabled] && value == ScreenMode.VBlank
+                    || State.Io[GraphicsIo.STAT][LcdStatus.OamCheckEnabled] && value == ScreenMode.AccessingOam)
+                {
+                    LcdStatusInterruptHandler?.Invoke();
+                }
+                
                 var state = (byte)value;
                 State.Io[GraphicsIo.STAT].LockBit(LcdStatus.ScreenModeLow, state.GetBit(0));
                 State.Io[GraphicsIo.STAT].LockBit(LcdStatus.ScreenModeHigh, state.GetBit(1));
             }
         }
 
-        private readonly byte[] framebuffer = new byte[Graphics.ScreenWidth * Graphics.ScreenHeight * 4];
-
         private readonly ILogger log;
+        
+        private readonly byte[] framebuffer = new byte[Graphics.ScreenWidth * Graphics.ScreenHeight * 4];
 
         private static readonly Dictionary<byte, (byte r, byte g, byte b)> Palette = new()
         {
