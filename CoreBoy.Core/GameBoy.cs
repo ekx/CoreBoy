@@ -98,6 +98,11 @@ namespace CoreBoy.Core
             mmu.LoadCartridge(cartridge);
         }
 
+        public void SetInput(InputState inputState)
+        {
+            mmu.SetInput(inputState);
+        }
+        
         public void SaveState()
         {
             using var stream = new FileStream("SaveState.xml", FileMode.Create);

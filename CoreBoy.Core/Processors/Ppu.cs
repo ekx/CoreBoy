@@ -136,7 +136,7 @@ namespace CoreBoy.Core.Processors
                     throw new ArgumentOutOfRangeException(nameof(ScreenMode), "Invalid screen mode");
             }
 
-            // Update LYC and trigger interrupt if applicable
+            // Update LYC signal and trigger interrupt if applicable
             var currentLycSignal = State.Io[GraphicsIo.LY].Value == State.Io[GraphicsIo.LYC].Value;
             if (currentLycSignal != State.Io[GraphicsIo.STAT][LcdStatus.LycSignal])
             {

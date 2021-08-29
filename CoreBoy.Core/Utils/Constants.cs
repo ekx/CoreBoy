@@ -100,6 +100,7 @@
 
     public static class MmuIo
     {
+        // ReSharper disable InconsistentNaming
         public const int P1 = 0x00;
         public const int SB = 0x01;
         public const int SC = 0x02;
@@ -119,6 +120,7 @@
         public const int HDMA5 = 0x55;
 
         public const int IE = 0x80;
+        // ReSharper restore InconsistentNaming
     }
 
     public static class Boot
@@ -142,5 +144,15 @@
         public const int Timer = 2;
         public const int SerialTransfer = 3;
         public const int Input = 4;
+    }
+
+    public static class Player1
+    {
+        public const int RightOrA = 0;
+        public const int LeftOrB = 1;
+        public const int UpOrSelect = 2;
+        public const int DownOrStart = 3;
+        public const int DirectionButtons = 4;
+        public const int ActionButtons = 5;
     }
 }

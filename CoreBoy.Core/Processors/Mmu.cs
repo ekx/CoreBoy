@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using CoreBoy.Core.Cartridges;
 using System.Runtime.Serialization;
 using CoreBoy.Core.Utils;
@@ -104,7 +105,11 @@ namespace CoreBoy.Core.Processors
                 // [FF80-FFFF] Zero-page RAM
                 else
                 {
-                    //log.LogDebug($"Read from Zero-page RAM. Address: {address:X4}, Value: {State.Hram[address & 0x7F]:X2}");
+                    if (address == 0xFFFF)
+                    {
+                        return State.Io.Last().Value;
+                    }
+                    
                     return State.Hram[address & 0x7F];
                 }
             }
@@ -166,7 +171,11 @@ namespace CoreBoy.Core.Processors
                 // [FF80-FFFF] Zero-page RAM
                 else
                 {
-                    //log.LogDebug($"Write to Zero-page RAM. Address: {address:X4}, Value: {value:X2}");
+                    if (address == 0xFFFF)
+                    {
+                        State.Io.Last().Value = value;
+                    }
+                    
                     State.Hram[address & 0x7F] = value;
                 }
             }
@@ -186,6 +195,36 @@ namespace CoreBoy.Core.Processors
         {
             ppu.UpdateState(cycles);
             spu.UpdateState(cycles);
+        }
+
+        public void SetInput(InputState inputState)
+        {
+            var dPadEnabled = !State.Io[MmuIo.P1][Player1.DirectionButtons];
+            var buttonsEnabled = !State.Io[MmuIo.P1][Player1.ActionButtons];
+
+            var prevRightOrA = State.Io[MmuIo.P1][Player1.RightOrA];
+            var prevLeftOrB = State.Io[MmuIo.P1][Player1.LeftOrB];
+            var prevUpOrSelect = State.Io[MmuIo.P1][Player1.UpOrSelect];
+            var prevDownOrStart = State.Io[MmuIo.P1][Player1.DownOrStart];
+
+            State.Io[MmuIo.P1][Player1.RightOrA] =
+                !((dPadEnabled && inputState.RightPressed) || (buttonsEnabled && inputState.APressed));
+            State.Io[MmuIo.P1][Player1.LeftOrB] =
+                !((dPadEnabled && inputState.LeftPressed) || (buttonsEnabled && inputState.BPressed));
+            State.Io[MmuIo.P1][Player1.UpOrSelect] =
+                !((dPadEnabled && inputState.UpPressed) || (buttonsEnabled && inputState.SelectPressed));
+            State.Io[MmuIo.P1][Player1.DownOrStart] =
+                !((dPadEnabled && inputState.DownPressed) || (buttonsEnabled && inputState.StartPressed));
+
+            if (
+                (prevRightOrA && !State.Io[MmuIo.P1][Player1.RightOrA])
+                || (prevLeftOrB && !State.Io[MmuIo.P1][Player1.LeftOrB])
+                || (prevUpOrSelect && !State.Io[MmuIo.P1][Player1.UpOrSelect])
+                || (prevDownOrStart && !State.Io[MmuIo.P1][Player1.DownOrStart])
+            )
+            {
+                State.Io[MmuIo.IF][InterruptFlag.Input] = true;
+            }
         }
 
         private readonly ILogger log;

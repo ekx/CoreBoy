@@ -12,6 +12,7 @@ namespace CoreBoy.Core.Processors
         void LoadBootRom(byte[] bootRomIn);
         void LoadCartridge(ICartridge cartridgeIn);
         void UpdateState(long cycles);
+        void SetInput(InputState inputState);
         byte this[ushort address] { get; set; }
     }
 }

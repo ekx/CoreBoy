@@ -9,8 +9,4 @@
     public delegate void TimerInterruptDelegate();
 
     public delegate void SerialTransferInterruptDelegate();
-
-    public delegate void InputInterruptDelegate();
-
-    public delegate void InterruptTriggeredDelegate(InterruptType interruptType);
 }

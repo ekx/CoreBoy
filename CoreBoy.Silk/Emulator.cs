@@ -36,7 +36,7 @@ namespace CoreBoy.Silk
         public void Run()
         {
             var bootRomPath = Path.Combine("Resources", "boot.rom");
-            var cartridgePath = Path.Combine("Resources", "tetris.gb");
+            var cartridgePath = Path.Combine("Resources", "opus5.gb");
 
             gameBoy.LoadBootRom(bootRomPath);
             gameBoy.LoadCartridge(cartridgePath);
@@ -45,17 +45,20 @@ namespace CoreBoy.Silk
             emulatorThread.Start();
             
             window.Load += OnLoad;
+            window.Update += OnUpdate;
             window.Render += OnRender;
             window.Closing += OnClose;
 
+            window.UpdatesPerSecond = 60;
+            
             window.Run();
         }
-        
+
         private void OnLoad()
         {
-            var input = window.CreateInput();
+            inputContext = window.CreateInput();
             
-            foreach (var keyboard in input.Keyboards)
+            foreach (var keyboard in inputContext.Keyboards)
             {
                 keyboard.KeyDown += KeyDown;
             }
@@ -73,7 +76,23 @@ namespace CoreBoy.Silk
             texture = new Texture(gl, Span<byte>.Empty, default, default);
         }
 
-        private unsafe void OnRender(double obj)
+        private void OnUpdate(double frameTime)
+        {
+            var keyboard = inputContext.Keyboards[0];
+            
+            gameBoy.SetInput(new InputState(
+                keyboard.IsKeyPressed(Key.W),
+                keyboard.IsKeyPressed(Key.A),
+                keyboard.IsKeyPressed(Key.S),
+                keyboard.IsKeyPressed(Key.D),
+                keyboard.IsKeyPressed(Key.H),
+                keyboard.IsKeyPressed(Key.J),
+                keyboard.IsKeyPressed(Key.K),
+                keyboard.IsKeyPressed(Key.L)
+            ));
+        }
+        
+        private unsafe void OnRender(double frameTime)
         {
             gl.Clear((uint) ClearBufferMask.ColorBufferBit);
 
@@ -115,7 +134,7 @@ namespace CoreBoy.Silk
                 window.Close();
             }
         }
-        
+
         private void OnRenderFrameBuffer(byte[] framebufferIn)
         {
             framebuffer = framebufferIn;
@@ -134,8 +153,9 @@ namespace CoreBoy.Silk
             lastFramebuffer = DateTime.UtcNow;
         }
         
-        private readonly IWindow window;
         private GL gl;
+        private IInputContext inputContext;
+        private readonly IWindow window;
 
         private BufferObject<float> vbo;
         private BufferObject<uint> ebo;
@@ -151,8 +171,8 @@ namespace CoreBoy.Silk
         private float fpsAverage;
         private int fpsIndex;
         
-        private readonly GameBoy gameBoy;
         private Thread emulatorThread;
+        private readonly GameBoy gameBoy;
 
         private readonly float[] vertices =
         {
