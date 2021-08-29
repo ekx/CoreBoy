@@ -15,8 +15,6 @@ namespace CoreBoy.Core.Processors
 
             this.log = log;
             this.mmu = mmu;
-            
-            this.mmu.InterruptTriggeredHandler += OnInterruptTriggered;
         }
 
         public void Reset()
@@ -28,23 +26,26 @@ namespace CoreBoy.Core.Processors
 
         public void RunInstructionCycle()
         {
-            if (State.Halt || State.Stop)
-            {
-                // TODO: Check if this is correct
-                mmu.UpdateState(0);
-                return;
-            }
-
             try
             {
-                // Fetch
-                var opcode = ReadByte(State.Pc++);
+                if (!State.Stop && !State.Halt)
+                {
+                    // Fetch
+                    var opcode = ReadByte(State.Pc++);
 
-                // Decode
-                var instruction = opcodeTable[opcode];
+                    // Decode
+                    var instruction = opcodeTable[opcode];
 
-                // Execute
-                instruction();       
+                    // Execute
+                    instruction();
+                }
+                else
+                {
+                    //Idle();
+                    UpdateClock(0);
+                }
+                
+                HandleInterrupts();
             }
             catch (KeyNotFoundException e)
             {
@@ -96,11 +97,47 @@ namespace CoreBoy.Core.Processors
             return State.Af.Low[(int)flag];
         }
         
-        private void OnInterruptTriggered(InterruptType interruptType)
+        private void HandleInterrupts()
         {
-            if (!State.MasterInterruptEnable) 
+            if (!State.MasterInterruptEnable)
+            {
+                // TODO: Check if all IF flags are discarded each cycle
+                // mmu.State.Io[MmuIo.IF].Value = 0x00;
                 return;
+            }
+
+            if (mmu.State.Io[MmuIo.IF][InterruptFlag.VBlank] && mmu.State.Io[MmuIo.IE][InterruptEnable.VBlank])
+            {
+                mmu.State.Io[MmuIo.IF][InterruptFlag.VBlank] = false;
+                HandleInterrupt(InterruptType.VBlank);
+            }
+            else if (mmu.State.Io[MmuIo.IF][InterruptFlag.LcdStatus] && mmu.State.Io[MmuIo.IE][InterruptEnable.LcdStatus])
+            {
+                mmu.State.Io[MmuIo.IF][InterruptFlag.LcdStatus] = false;
+                HandleInterrupt(InterruptType.LcdStatus);
+            }
+            else if (mmu.State.Io[MmuIo.IF][InterruptFlag.Timer] && mmu.State.Io[MmuIo.IE][InterruptEnable.Timer])
+            {
+                mmu.State.Io[MmuIo.IF][InterruptFlag.Timer] = false;
+                HandleInterrupt(InterruptType.Timer);
+            }
+            else if (mmu.State.Io[MmuIo.IF][InterruptFlag.SerialTransfer] && mmu.State.Io[MmuIo.IE][InterruptEnable.SerialTransfer])
+            {
+                mmu.State.Io[MmuIo.IF][InterruptFlag.SerialTransfer] = false;
+                HandleInterrupt(InterruptType.SerialTransfer);
+            }
+            else if (mmu.State.Io[MmuIo.IF][InterruptFlag.Input] && mmu.State.Io[MmuIo.IE][InterruptEnable.Input])
+            {
+                mmu.State.Io[MmuIo.IF][InterruptFlag.Input] = false;
+                HandleInterrupt(InterruptType.Input);
+            }
             
+            // TODO: Check if all IF flags are discarded each cycle
+            // mmu.State.Io[MmuIo.IF].Value = 0x00;
+        }
+
+        private void HandleInterrupt(InterruptType interruptType)
+        {
             State.MasterInterruptEnable = false;
 
             Idle();

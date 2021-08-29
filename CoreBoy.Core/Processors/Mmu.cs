@@ -8,8 +8,6 @@ namespace CoreBoy.Core.Processors
 {
     public sealed class Mmu : IMmu
     {
-        public event InterruptTriggeredDelegate InterruptTriggeredHandler;
-        
         public MmuState State { get; set; }
 
         public ICartridgeState CartridgeState
@@ -26,14 +24,14 @@ namespace CoreBoy.Core.Processors
 
             this.ppu.VBlankInterruptHandler += () =>
             {
-                if (State != null && State.Io[MmuIo.IE][InterruptEnable.VBlank])
-                    InterruptTriggeredHandler?.Invoke(InterruptType.VBlank);
+                if (State != null)
+                    State.Io[MmuIo.IF][InterruptFlag.VBlank] = true;
             };
 
             this.ppu.LcdStatusInterruptHandler += () =>
             {
-                if (State != null && State.Io[MmuIo.IE][InterruptEnable.LcdStatus])
-                    InterruptTriggeredHandler?.Invoke(InterruptType.LcdStatus);
+                if (State != null)
+                    State.Io[MmuIo.IF][InterruptFlag.LcdStatus] = true;
             };
         }
 
@@ -98,16 +96,9 @@ namespace CoreBoy.Core.Processors
                     {
                         return ppu[address];
                     }
-                    else if (address is >= 0xFF51 and <= 0xFF55)
-                    {
-                        log.LogError($"HDMA read not implemented. Address: {address:X4}");
-                        return 0x00;
-                    }
-                    // TODO: Implement I/O
                     else
                     {
-                        log.LogError($"I/O read unknown. Address: {address:X4}");
-                        return 0x00;
+                        return State.Io[address & 0xFF].Value;
                     }
                 }
                 // [FF80-FFFF] Zero-page RAM
@@ -123,7 +114,7 @@ namespace CoreBoy.Core.Processors
                 // [0000-7FFF] Cartridge ROM
                 if (address < 0x8000)
                 {
-                    this.cartridge[address] = value;
+                    cartridge[address] = value;
                 }
                 // [8000-9FFF] Graphics RAM
                 else if (address < 0xA000)
@@ -133,7 +124,7 @@ namespace CoreBoy.Core.Processors
                 // [A000-BFFF] Cartridge RAM
                 else if (address < 0xC000)
                 {
-                    this.cartridge[address] = value;
+                    cartridge[address] = value;
                 }
                 // [C000-FDFF] Working RAM + Shadow
                 else if (address < 0xFE00)
@@ -161,20 +152,15 @@ namespace CoreBoy.Core.Processors
                     else if (address is >= 0xFF40 and <= 0xFF4B)
                     {
                         ppu[address] = value;
-                        return;
                     }
-                    else if (address == 0xFF50 && value == 0x01)
-                    {
-                        State.Io[address & 0xFF].LockBit(Boot.BootOff, true);
-                    }
-                    else if (address is >= 0xFF51 and <= 0xFF55)
-                    {
-                        log.LogError($"HDMA write not implemented. Address: {address:X4}, Value: {value:X2}");
-                    }
-                    // TODO: Implement I/O
                     else
                     {
-                        log.LogError($"I/O write not implemented. Address: {address:X4}, Value: {value:X2}");
+                        if (address == 0xFF50 && value == 0x01 && !State.Io[MmuIo.BOOT][Boot.BootOff])
+                        {
+                            State.Io[address & 0xFF].LockBit(Boot.BootOff, true);
+                        }
+
+                        State.Io[address & 0xFF].Value = value;
                     }
                 }
                 // [FF80-FFFF] Zero-page RAM

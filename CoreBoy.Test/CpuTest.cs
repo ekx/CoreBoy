@@ -86,8 +86,17 @@ namespace CoreBoy.Test
             cpu.State.MasterInterruptEnable = true;
             cpu.State.Pc = 0x1234;
             cpu.State.Sp = 0x5678;
-
-            mmu.Raise(m => m.InterruptTriggeredHandler += null, InterruptType.VBlank);
+            cpu.State.Halt = true;
+            
+            var mmuIo = new MemoryCell[129];
+            mmuIo[MmuIo.IF] = new MemoryCell { Value = 0x01 };
+            mmuIo[MmuIo.IE] = new MemoryCell { Value = 0x01 };
+            var mmuState = new MmuState
+            {
+                Io = mmuIo
+            };
+            mmu.Setup(m => m.State).Returns(mmuState);
+            cpu.RunInstructionCycle();
             
             mmu.VerifySet(m => m[0x5677] = 0x12, Times.Once());
             mmu.VerifySet(m => m[0x5676] = 0x34, Times.Once());
