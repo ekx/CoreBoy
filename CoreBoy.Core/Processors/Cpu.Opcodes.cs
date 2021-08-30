@@ -125,8 +125,8 @@ namespace CoreBoy.Core.Processors
                 { 0x21, () => { State.Hl = ReadWord(State.Pc); State.Pc += 2; } },		                // LD HL, ##
                 { 0x31, () => { State.Sp = ReadWord(State.Pc); State.Pc += 2; } },		                // LD SP, ##
 
-                { 0x08, () => { WriteWord(ReadWord(State.Pc), State.Sp); State.Pc += 2; } },  // LD (##), SP
-                { 0xF8, LoadSpIntoHl},                                                                         // LD HL, SP + #
+                { 0x08, () => { WriteWord(ReadWord(State.Pc), State.Sp); State.Pc += 2; } },   // LD (##), SP
+                { 0xF8, LoadSpIntoHl},                                                                          // LD HL, SP + #
                 { 0xF9, () => { State.Sp = State.Hl; Idle(); } },                                               // LD SP, HL
 
                 // Special Loads
@@ -396,6 +396,35 @@ namespace CoreBoy.Core.Processors
                 { 0x1E, () => { RotateRight(State.Hl, false); } },                                    // RR (HL)
                 { 0x1F, () => { RotateRight(ref State.Af.High, false); } },                             // RR A
 
+                // Shift Left
+                { 0x20, () => { ShiftLeft(ref State.Bc.High); } },                                          // SLA B
+                { 0x21, () => { ShiftLeft(ref State.Bc.Low); } },                                           // SLA C
+                { 0x22, () => { ShiftLeft(ref State.De.High); } },                                          // SLA D
+                { 0x23, () => { ShiftLeft(ref State.De.Low); } },                                           // SLA E
+                { 0x24, () => { ShiftLeft(ref State.Hl.High); } },                                          // SLA H
+                { 0x25, () => { ShiftLeft(ref State.Hl.Low); } },                                           // SLA L
+                { 0x26, () => { ShiftLeft(State.Hl); } },                                                 // SLA (HL)
+                { 0x27, () => { ShiftLeft(ref State.Af.High); } },                                          // SLA A
+                
+                // Shift Right
+                { 0x28, () => { ShiftRight(ref State.Bc.High, true); } },                            // SRA B
+                { 0x29, () => { ShiftRight(ref State.Bc.Low, true); } },                             // SRA C
+                { 0x2A, () => { ShiftRight(ref State.De.High, true); } },                            // SRA D
+                { 0x2B, () => { ShiftRight(ref State.De.Low, true); } },                             // SRA E
+                { 0x2C, () => { ShiftRight(ref State.Hl.High, true); } },                            // SRA H
+                { 0x2D, () => { ShiftRight(ref State.Hl.Low, true); } },                             // SRA L
+                { 0x2E, () => { ShiftRight(State.Hl, true); } },                                   // SRA (HL)
+                { 0x2F, () => { ShiftRight(ref State.Af.High, true); } },                            // SRA A
+                
+                { 0x38, () => { ShiftRight(ref State.Bc.High, false); } },                           // SRL B
+                { 0x39, () => { ShiftRight(ref State.Bc.Low, false); } },                            // SRL C
+                { 0x3A, () => { ShiftRight(ref State.De.High, false); } },                           // SRL D
+                { 0x3B, () => { ShiftRight(ref State.De.Low, false); } },                            // SRL E
+                { 0x3C, () => { ShiftRight(ref State.Hl.High, false); } },                           // SRL H
+                { 0x3D, () => { ShiftRight(ref State.Hl.Low, false); } },                            // SRL L
+                { 0x3E, () => { ShiftRight(State.Hl, false); } },                                  // SRL (HL)
+                { 0x3F, () => { ShiftRight(ref State.Af.High, false); } },                           // SRL A
+                
                 // Swap
                 { 0x30, () => { Swap(ref State.Bc.High); } },                                               // SWAP B
                 { 0x31, () => { Swap(ref State.Bc.Low); } },                                                // SWAP C

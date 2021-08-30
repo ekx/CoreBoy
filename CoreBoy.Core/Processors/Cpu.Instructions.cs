@@ -17,7 +17,7 @@ namespace CoreBoy.Core.Processors
 
         private void LoadSpIntoHl()
         {
-            var value = ReadByte(State.Pc++); 
+            var value = ReadByte(State.Pc++);
 
             SetFlag(RegisterFlag.C, (State.Sp.Low + value) > 0xFF);
             SetFlag(RegisterFlag.H, ((State.Sp & 0x0F) + (value & 0x0F)) > 0x0F);
@@ -56,8 +56,9 @@ namespace CoreBoy.Core.Processors
             var address = ReadWord(State.Pc);
             State.Pc += 2;
 
-            if (!condition) return;
-            
+            if (!condition)
+                return;
+
             State.Pc = address;
             Idle();
         }
@@ -66,8 +67,9 @@ namespace CoreBoy.Core.Processors
         {
             var offset = (sbyte)ReadByte(State.Pc++);
 
-            if (!condition) return;
-            
+            if (!condition)
+                return;
+
             State.Pc = (ushort)(State.Pc.Value + offset);
             Idle();
         }
@@ -91,8 +93,9 @@ namespace CoreBoy.Core.Processors
             var address = ReadWord(State.Pc);
             State.Pc += 2;
 
-            if (!condition) return;
-            
+            if (!condition)
+                return;
+
             Push(State.Pc);
             State.Pc = address;
         }
@@ -154,6 +157,7 @@ namespace CoreBoy.Core.Processors
                 SetFlag(RegisterFlag.Z, false);
                 Idle();
             }
+
             Idle();
 
             target = (ushort)result;
@@ -210,7 +214,7 @@ namespace CoreBoy.Core.Processors
             SetFlag(RegisterFlag.H, false);
             SetFlag(RegisterFlag.C, false);
         }
-        
+
         private void Compare(byte value)
         {
             Subtract(value, false, false);
@@ -219,12 +223,12 @@ namespace CoreBoy.Core.Processors
         private void DecimalAdjustA()
         {
             byte correction = 0;
-            
+
             if (GetFlag(RegisterFlag.H) || !GetFlag(RegisterFlag.N) && (State.Af.High & 0xf) > 0x9)
             {
                 correction |= 0x6;
             }
-            
+
             if (GetFlag(RegisterFlag.C) || !GetFlag(RegisterFlag.N) && State.Af.High > 0x99)
             {
                 correction |= 0x60;
@@ -232,7 +236,7 @@ namespace CoreBoy.Core.Processors
             }
 
             State.Af.High = (byte)(State.Af.High + (GetFlag(RegisterFlag.N) ? -correction : correction));
-            
+
             SetFlag(RegisterFlag.Z, State.Af.High == 0x0);
             SetFlag(RegisterFlag.H, false);
         }
@@ -240,11 +244,11 @@ namespace CoreBoy.Core.Processors
         private void ComplementA()
         {
             State.Af.High = (byte)~State.Af.High;
-            
+
             SetFlag(RegisterFlag.N, true);
             SetFlag(RegisterFlag.H, true);
         }
-        
+
         private void ComplementCarryFlag()
         {
             SetFlag(RegisterFlag.N, false);
@@ -275,6 +279,9 @@ namespace CoreBoy.Core.Processors
                 value[0] = GetFlag(RegisterFlag.C);
             }
 
+            SetFlag(RegisterFlag.Z, value.Value == 0);
+            SetFlag(RegisterFlag.N, false);
+            SetFlag(RegisterFlag.H, false);
             SetFlag(RegisterFlag.C, bit7);
         }
 
@@ -299,6 +306,9 @@ namespace CoreBoy.Core.Processors
                 value[7] = GetFlag(RegisterFlag.C);
             }
 
+            SetFlag(RegisterFlag.Z, value.Value == 0);
+            SetFlag(RegisterFlag.N, false);
+            SetFlag(RegisterFlag.H, false);
             SetFlag(RegisterFlag.C, bit0);
         }
 
@@ -306,6 +316,50 @@ namespace CoreBoy.Core.Processors
         {
             RegisterByte value = ReadByte(address);
             RotateRight(ref value, carry);
+            WriteByte(address, value);
+        }
+
+        private void ShiftLeft(ref RegisterByte value)
+        {
+            var bit7 = (value >> 7) == 1;
+            
+            value = (byte)(value << 1);
+            
+            SetFlag(RegisterFlag.Z, value.Value == 0);
+            SetFlag(RegisterFlag.N, false);
+            SetFlag(RegisterFlag.H, false);
+            SetFlag(RegisterFlag.C, bit7);
+        }
+        
+        private void ShiftLeft(ushort address)
+        {
+            RegisterByte value = ReadByte(address);
+            ShiftLeft(ref value);
+            WriteByte(address, value);
+        }
+
+        private void ShiftRight(ref RegisterByte value, bool keepMsb)
+        {
+            var bit0 = (value & 1) == 1;
+            var bit7 = (value & 7) == 1;
+
+            value = (byte)(value >> 1);
+
+            if (keepMsb)
+            {
+                value[7] = bit7;
+            }
+
+            SetFlag(RegisterFlag.Z, value.Value == 0);
+            SetFlag(RegisterFlag.N, false);
+            SetFlag(RegisterFlag.H, false);
+            SetFlag(RegisterFlag.C, bit0);
+        }
+        
+        private void ShiftRight(ushort address, bool keepMsb)
+        {
+            RegisterByte value = ReadByte(address);
+            ShiftRight(ref value, keepMsb);
             WriteByte(address, value);
         }
 
