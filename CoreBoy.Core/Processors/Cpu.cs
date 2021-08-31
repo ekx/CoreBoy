@@ -41,8 +41,7 @@ namespace CoreBoy.Core.Processors
                 }
                 else
                 {
-                    //Idle();
-                    UpdateClock(0);
+                    Idle();
                 }
                 
                 HandleInterrupts();
