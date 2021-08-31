@@ -35,7 +35,7 @@ namespace CoreBoy.Core.Processors
                 // [8000-9FFF] Graphics RAM
                 if (address is >= 0x8000 and < 0xA000)
                 {
-                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode == 3)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode == ScreenMode.TransferringData)
                     {
                         log.LogWarning($"Read from Graphics RAM while inaccessible. Address: {address:X4}");
                         return 0xFF;
@@ -47,7 +47,7 @@ namespace CoreBoy.Core.Processors
                 // [FE00-FE9F] Object Attribute Memory
                 else if (address is >= 0xFE00 and < 0xFEA0)
                 {
-                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode >= 2)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode >= ScreenMode.AccessingOam)
                     {
                         log.LogWarning($"Read from OAM while inaccessible. Address: {address:X4}");
                         return 0xFF;
@@ -74,7 +74,7 @@ namespace CoreBoy.Core.Processors
                 // [8000-9FFF] Graphics RAM
                 if (address is >= 0x8000 and < 0xA000)
                 {
-                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode == 3)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode == ScreenMode.TransferringData)
                     {
                         log.LogWarning($"Write to Graphics RAM while inaccessible. Address: {address:X4}, Value: {value:X2}");
                         return;
@@ -86,7 +86,7 @@ namespace CoreBoy.Core.Processors
                 // [FE00-FE9F] Object Attribute Memory
                 else if (address is >= 0xFE00 and < 0xFEA0)
                 {
-                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && (int)ScreenMode >= 2)
+                    if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode >= ScreenMode.AccessingOam)
                     {
                         log.LogWarning($"Write to OAM while inaccessible. Address: {address:X4}, Value: {value:X2}");
                         return;
