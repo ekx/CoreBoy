@@ -150,7 +150,12 @@ namespace CoreBoy.Core.Processors
                 // [FF00-FF7F] Memory-mapped I/O
                 else if (address < 0xFF80)
                 {
-                    if (address is >= 0xFF11 and <= 0xFF3F)
+                    if (address == 0xFF00)
+                    {
+                        State.Io[address & 0xFF][Player1.ActionButtons] = (value & Player1.ActionButtons) == 1;
+                        State.Io[address & 0xFF][Player1.DirectionButtons] = (value & Player1.DirectionButtons) == 1;
+                    }
+                    else if (address is >= 0xFF11 and <= 0xFF3F)
                     {
                         log.LogError($"SPU write not implemented. Address: {address:X4}, Value: {value:X2}");
                     }
