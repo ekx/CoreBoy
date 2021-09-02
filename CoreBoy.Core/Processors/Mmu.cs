@@ -233,6 +233,7 @@ namespace CoreBoy.Core.Processors
             Io[MmuIo.HDMA3] = new MemoryCell();
             Io[MmuIo.HDMA4] = new MemoryCell();
             Io[MmuIo.HDMA5] = new MemoryCell();
+            Io[MmuIo.IE] = new MemoryCell();
             
             Io[MmuIo.P1].LockBits(6, 2, true);
             Io[MmuIo.SC].LockBits(2, 5, true);
