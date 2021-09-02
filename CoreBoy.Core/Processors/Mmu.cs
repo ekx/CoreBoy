@@ -2,7 +2,9 @@
 using System.Linq;
 using CoreBoy.Core.Cartridges;
 using System.Runtime.Serialization;
+using CoreBoy.Core.Processors.Interfaces;
 using CoreBoy.Core.Utils;
+using CoreBoy.Core.Utils.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
@@ -150,12 +152,7 @@ namespace CoreBoy.Core.Processors
                 // [FF00-FF7F] Memory-mapped I/O
                 else if (address < 0xFF80)
                 {
-                    if (address == 0xFF00)
-                    {
-                        State.Io[address & 0xFF][Player1.ActionButtons] = (value & Player1.ActionButtons) == 1;
-                        State.Io[address & 0xFF][Player1.DirectionButtons] = (value & Player1.DirectionButtons) == 1;
-                    }
-                    else if (address is >= 0xFF11 and <= 0xFF3F)
+                    if (address is >= 0xFF11 and <= 0xFF3F)
                     {
                         log.LogError($"SPU write not implemented. Address: {address:X4}, Value: {value:X2}");
                     }
@@ -204,32 +201,7 @@ namespace CoreBoy.Core.Processors
 
         public void SetInput(InputState inputState)
         {
-            var dPadEnabled = !State.Io[MmuIo.P1][Player1.DirectionButtons];
-            var buttonsEnabled = !State.Io[MmuIo.P1][Player1.ActionButtons];
-
-            var prevRightOrA = State.Io[MmuIo.P1][Player1.RightOrA];
-            var prevLeftOrB = State.Io[MmuIo.P1][Player1.LeftOrB];
-            var prevUpOrSelect = State.Io[MmuIo.P1][Player1.UpOrSelect];
-            var prevDownOrStart = State.Io[MmuIo.P1][Player1.DownOrStart];
-
-            State.Io[MmuIo.P1][Player1.RightOrA] =
-                !((dPadEnabled && inputState.RightPressed) || (buttonsEnabled && inputState.APressed));
-            State.Io[MmuIo.P1][Player1.LeftOrB] =
-                !((dPadEnabled && inputState.LeftPressed) || (buttonsEnabled && inputState.BPressed));
-            State.Io[MmuIo.P1][Player1.UpOrSelect] =
-                !((dPadEnabled && inputState.UpPressed) || (buttonsEnabled && inputState.SelectPressed));
-            State.Io[MmuIo.P1][Player1.DownOrStart] =
-                !((dPadEnabled && inputState.DownPressed) || (buttonsEnabled && inputState.StartPressed));
-
-            if (
-                (prevRightOrA && !State.Io[MmuIo.P1][Player1.RightOrA])
-                || (prevLeftOrB && !State.Io[MmuIo.P1][Player1.LeftOrB])
-                || (prevUpOrSelect && !State.Io[MmuIo.P1][Player1.UpOrSelect])
-                || (prevDownOrStart && !State.Io[MmuIo.P1][Player1.DownOrStart])
-            )
-            {
-                State.Io[MmuIo.IF][InterruptFlag.Input] = true;
-            }
+            State.Io[MmuIo.IF][InterruptFlag.Input] = ((InputCell) State.Io[MmuIo.P1]).UpdateInputState(inputState);
         }
 
         private readonly ILogger log;
@@ -245,8 +217,23 @@ namespace CoreBoy.Core.Processors
     {
         public MmuState()
         {
-            Io.Populate(() => new MemoryCell());
+            Io.Populate(() => new UndefinedCell());
 
+            Io[MmuIo.P1] = new InputCell();
+            Io[MmuIo.SB] = new MemoryCell();
+            Io[MmuIo.SC] = new MemoryCell();
+            Io[MmuIo.DIV] = new MemoryCell();
+            Io[MmuIo.TIMA] = new MemoryCell();
+            Io[MmuIo.TMA] = new MemoryCell();
+            Io[MmuIo.TAC] = new MemoryCell();
+            Io[MmuIo.IF] = new MemoryCell();
+            Io[MmuIo.BOOT] = new MemoryCell();
+            Io[MmuIo.HDMA1] = new MemoryCell();
+            Io[MmuIo.HDMA2] = new MemoryCell();
+            Io[MmuIo.HDMA3] = new MemoryCell();
+            Io[MmuIo.HDMA4] = new MemoryCell();
+            Io[MmuIo.HDMA5] = new MemoryCell();
+            
             Io[MmuIo.P1].LockBits(6, 2, true);
             Io[MmuIo.SC].LockBits(2, 5, true);
             Io[MmuIo.TAC].LockBits(3, 5, true);
@@ -260,7 +247,7 @@ namespace CoreBoy.Core.Processors
         }
 
         [DataMember]
-        public MemoryCell[] Io = new MemoryCell[129];
+        public IMemoryCell[] Io = new IMemoryCell[129];
 
         [DataMember]
         public byte[] Wram = new byte[8192];

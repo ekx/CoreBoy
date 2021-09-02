@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.Serialization;
+using CoreBoy.Core.Processors.Interfaces;
 
 namespace CoreBoy.Core.Processors
 {

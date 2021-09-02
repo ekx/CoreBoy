@@ -29,6 +29,7 @@ namespace CoreBoy.Core.Utils
             {
                 array[i] = provider();
             }
+            
             return array;
         }
     }

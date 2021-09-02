@@ -4,6 +4,7 @@ using CoreBoy.Core.Processors;
 using System;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using CoreBoy.Core.Processors.Interfaces;
 using CoreBoy.Core.Utils;
 using Microsoft.Extensions.Logging;
 

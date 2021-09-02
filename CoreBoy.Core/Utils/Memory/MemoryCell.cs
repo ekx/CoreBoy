@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace CoreBoy.Core.Utils
+namespace CoreBoy.Core.Utils.Memory
 {
     [DataContract]
-    public class MemoryCell
+    public class MemoryCell : IMemoryCell
     {
         public byte Value
         {

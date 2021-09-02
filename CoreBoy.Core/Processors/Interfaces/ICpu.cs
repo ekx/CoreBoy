@@ -1,4 +1,4 @@
-﻿namespace CoreBoy.Core.Processors
+﻿namespace CoreBoy.Core.Processors.Interfaces
 {
     public interface ICpu
     {

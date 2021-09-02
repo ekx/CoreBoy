@@ -1,7 +1,7 @@
 ﻿using CoreBoy.Core.Cartridges;
 using CoreBoy.Core.Utils;
 
-namespace CoreBoy.Core.Processors
+namespace CoreBoy.Core.Processors.Interfaces
 {
     public interface IMmu
     {

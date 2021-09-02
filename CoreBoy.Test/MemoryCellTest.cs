@@ -1,4 +1,5 @@
 ﻿using CoreBoy.Core.Utils;
+using CoreBoy.Core.Utils.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CoreBoy.Test

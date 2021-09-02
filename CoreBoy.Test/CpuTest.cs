@@ -1,7 +1,9 @@
 ﻿using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using Moq;
 using CoreBoy.Core.Processors;
+using CoreBoy.Core.Processors.Interfaces;
 using CoreBoy.Core.Utils;
+using CoreBoy.Core.Utils.Memory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Extensions.Logging;
 

@@ -2,6 +2,8 @@
 using CoreBoy.Core.Utils;
 using System.Runtime.Serialization;
 using System.Collections.Generic;
+using CoreBoy.Core.Processors.Interfaces;
+using CoreBoy.Core.Utils.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors
@@ -366,7 +368,7 @@ namespace CoreBoy.Core.Processors
         }
 
         [DataMember]
-        public MemoryCell[] Io = new MemoryCell[12];
+        public IMemoryCell[] Io = new IMemoryCell[12];
         [DataMember]
         public byte[] Vram = new byte[8192];
         [DataMember]

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using CoreBoy.Core.Utils;
 using System.Runtime.Serialization;
+using CoreBoy.Core.Processors.Interfaces;
+using CoreBoy.Core.Utils.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace CoreBoy.Core.Processors

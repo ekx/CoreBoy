@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace CoreBoy.Core.Utils
+namespace CoreBoy.Core.Utils.Memory
 {
     [DataContract]
     public class RegisterByte
