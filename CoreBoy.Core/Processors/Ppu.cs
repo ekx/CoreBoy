@@ -111,14 +111,13 @@ public sealed class Ppu : IPpu
 
     public void UpdateState(long cycles)
     {
-        // TODO: Is this right? Also VRAM and OAM access?
+        State.Clock += cycles;
+
         if (!State.Io[GraphicsIo.LCDC][LcdControl.LcdPower])
         {
             return;
         }
-
-        State.Clock += cycles;
-
+        
         switch (ScreenMode)
         {
             case ScreenMode.HBlank:
@@ -229,7 +228,6 @@ public sealed class Ppu : IPpu
 
     private void RenderToFramebuffer(byte x, byte y, ushort tileMapOffset)
     {
-        // TODO: Should be cleaned up & performance improved
         var tileDataOffset = State.Io[GraphicsIo.LCDC][LcdControl.TileSet] ? (ushort)0x8000 : (ushort)0x8800;
         var mapOffset = tileDataOffset == 0x8800 ? 128 : 0;
 
