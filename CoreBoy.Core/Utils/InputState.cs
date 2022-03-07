@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace CoreBoy.Core.Utils;
+﻿namespace CoreBoy.Core.Utils;
 
 public record InputState(
     bool UpPressed,

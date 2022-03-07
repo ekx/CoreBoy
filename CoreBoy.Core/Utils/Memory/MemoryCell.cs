@@ -48,11 +48,11 @@ public class MemoryCell : IMemoryCell
         value = value.SetBit(index, valueIn);
     }
 
-    public void LockBits(int startIndex, int numberOfBits, bool value)
+    public void LockBits(int startIndex, int numberOfBits, bool valueIn)
     {
         for (var i = startIndex; i < startIndex + numberOfBits; i++)
         {
-            LockBit(i, value);
+            LockBit(i, valueIn);
         }
     }
 

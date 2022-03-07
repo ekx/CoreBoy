@@ -133,6 +133,11 @@ public class Emulator : IDisposable
         {
             window.Close();
         }
+
+        if (arg2 == Key.R)
+        {
+            gameBoy.Reset();
+        }
     }
 
     private void OnRenderFrameBuffer(byte[] framebufferIn)

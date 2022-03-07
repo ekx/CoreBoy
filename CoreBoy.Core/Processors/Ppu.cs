@@ -111,13 +111,13 @@ public sealed class Ppu : IPpu
 
     public void UpdateState(long cycles)
     {
-        State.Clock += cycles;
-
         if (!State.Io[GraphicsIo.LCDC][LcdControl.LcdPower])
         {
             return;
         }
         
+        State.Clock += cycles;
+
         switch (ScreenMode)
         {
             case ScreenMode.HBlank:
@@ -149,14 +149,7 @@ public sealed class Ppu : IPpu
     {
         if (State.Clock >= 204)
         {
-            if (State.Io[GraphicsIo.LY].Value == 143)
-            {
-                ScreenMode = ScreenMode.VBlank;
-            }
-            else
-            {
-                ScreenMode = ScreenMode.AccessingOam;
-            }
+            ScreenMode = State.Io[GraphicsIo.LY].Value == 143 ? ScreenMode.VBlank : ScreenMode.AccessingOam;
 
             State.Clock = 0;
             State.Io[GraphicsIo.LY].Value++;
@@ -302,8 +295,8 @@ public sealed class Ppu : IPpu
         }
 
         byte colorValue = 0;
-        colorValue |= currentPalette.GetBit(low) ? (byte)1 : (byte)0;
-        colorValue |= currentPalette.GetBit(high) ? (byte)2 : (byte)0;
+        colorValue |= (byte) (currentPalette.GetBit(low) ? 1 : 0);
+        colorValue |= (byte) (currentPalette.GetBit(high) ? 2 : 0);
 
         return colorValue;
     }

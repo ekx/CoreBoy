@@ -33,7 +33,7 @@ public class MmuState
         Io[MmuIo.TAC].LockBits(3, 5, true);
         Io[MmuIo.IF].LockBits(5, 3, true);
         Io[MmuIo.BOOT].LockBits(1, 7, true);
-        // Io[MmuIo.IE].LockBits(5, 3, true);
+        Io[MmuIo.IE].LockBits(5, 3, true);
             
         var random = new Random();
         random.NextBytes(Wram);

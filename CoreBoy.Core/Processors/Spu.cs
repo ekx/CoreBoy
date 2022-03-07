@@ -9,7 +9,7 @@ public class Spu : ISpu
 {
     public SpuState State { get; set; }
 
-    public Spu(ILogger<Spu> log)
+    public Spu(ILogger log)
     {
         this.log = log;
     }

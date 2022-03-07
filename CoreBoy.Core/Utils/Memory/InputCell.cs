@@ -75,10 +75,10 @@ public class InputCell : IMemoryCell
 
         inputState = inputStateIn;
 
-        return (prevRightOrA && !this[Player1.RightOrA])
-               || (prevLeftOrB && !this[Player1.LeftOrB])
-               || (prevUpOrSelect && !this[Player1.UpOrSelect])
-               || (prevDownOrStart && !this[Player1.DownOrStart]);
+        return (prevRightOrA != this[Player1.RightOrA])
+               || (prevLeftOrB != this[Player1.LeftOrB])
+               || (prevUpOrSelect != this[Player1.UpOrSelect])
+               || (prevDownOrStart != this[Player1.DownOrStart]);
     }
 
     public void LockBit(int index, bool valueIn) { }

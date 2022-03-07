@@ -95,7 +95,7 @@ public sealed partial class Cpu : ICpu
         if (!State.MasterInterruptEnable)
         {
             // TODO: Check if all IF flags are discarded each cycle
-            // mmu.State.Io[MmuIo.IF].Value = 0x00;
+            mmu.State.Io[MmuIo.IF].Value = 0x00;
             return false;
         }
 
@@ -131,7 +131,7 @@ public sealed partial class Cpu : ICpu
         }
 
         // TODO: Check if all IF flags are discarded each cycle
-        // mmu.State.Io[MmuIo.IF].Value = 0x00;
+        mmu.State.Io[MmuIo.IF].Value = 0x00;
         return false;
     }
 
