@@ -1,10 +1,11 @@
-﻿namespace CoreBoy.Core.Processors.Interfaces
-{
-    public interface ICpu
-    {
-        CpuState State { get; set; }
+﻿using CoreBoy.Core.Processors.State;
 
-        void Reset();
-        void RunInstructionCycle();
-    }
+namespace CoreBoy.Core.Processors.Interfaces;
+
+public interface ICpu
+{
+    CpuState State { get; set; }
+
+    void Reset();
+    void RunInstructionCycle();
 }

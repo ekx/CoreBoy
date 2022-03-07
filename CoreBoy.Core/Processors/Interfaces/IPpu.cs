@@ -1,17 +1,17 @@
-﻿using CoreBoy.Core.Utils;
+﻿using CoreBoy.Core.Processors.State;
+using CoreBoy.Core.Utils;
 
-namespace CoreBoy.Core.Processors.Interfaces
+namespace CoreBoy.Core.Processors.Interfaces;
+
+public interface IPpu
 {
-    public interface IPpu
-    {
-        event RenderFramebufferDelegate RenderFramebufferHandler;
-        event VBlankInterruptDelegate VBlankInterruptHandler;
-        event LcdStatusInterruptDelegate LcdStatusInterruptHandler;
+    event RenderFramebufferDelegate RenderFramebufferHandler;
+    event VBlankInterruptDelegate VBlankInterruptHandler;
+    event LcdStatusInterruptDelegate LcdStatusInterruptHandler;
 
-        PpuState State { get; set; }
+    PpuState State { get; set; }
 
-        void Reset();
-        void UpdateState(long cycles);
-        byte this[ushort address] { get; set; }
-    }
+    void Reset();
+    void UpdateState(long cycles);
+    byte this[ushort address] { get; set; }
 }

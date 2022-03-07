@@ -17,10 +17,10 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
-      <PackageReference Include="Silk.NET.Core" Version="2.11.0" />
-      <PackageReference Include="Silk.NET.Input" Version="2.11.0" />
-      <PackageReference Include="Silk.NET.OpenGL" Version="2.11.0" />
-      <PackageReference Include="Silk.NET.Windowing" Version="2.11.0" />
+      <PackageReference Include="Silk.NET.Core" Version="2.13.0" />
+      <PackageReference Include="Silk.NET.Input" Version="2.13.0" />
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.13.0" />
+      <PackageReference Include="Silk.NET.Windowing" Version="2.13.0" />
     </ItemGroup>
 
     <ItemGroup>

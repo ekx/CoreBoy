@@ -1,13 +1,12 @@
-﻿namespace CoreBoy.Core.Utils.Memory
+﻿namespace CoreBoy.Core.Utils.Memory;
+
+public interface IMemoryCell
 {
-    public interface IMemoryCell
-    {
-        byte Value { get; set; }
+    byte Value { get; set; }
         
-        bool this[int bitIndex] { get; set; }
+    bool this[int bitIndex] { get; set; }
 
-        void LockBit(int index, bool valueIn);
+    void LockBit(int index, bool valueIn);
 
-        void LockBits(int startIndex, int numberOfBits, bool value);
-    }
+    void LockBits(int startIndex, int numberOfBits, bool value);
 }

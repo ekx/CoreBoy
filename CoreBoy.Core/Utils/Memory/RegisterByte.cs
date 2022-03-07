@@ -1,44 +1,43 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace CoreBoy.Core.Utils.Memory
+namespace CoreBoy.Core.Utils.Memory;
+
+[DataContract]
+public class RegisterByte
 {
-    [DataContract]
-    public class RegisterByte
+    [DataMember]
+    public byte Value;
+
+    public RegisterByte()
     {
-        [DataMember]
-        public byte Value;
+        Value = 0x00;
+    }
 
-        public RegisterByte()
-        {
-            Value = 0x00;
-        }
+    public RegisterByte(byte value)
+    {
+        Value = value;
+    }
 
-        public RegisterByte(byte value)
-        {
-            Value = value;
-        }
+    public static implicit operator RegisterByte(byte value)
+    {
+        return new RegisterByte(value);
+    }
 
-        public static implicit operator RegisterByte(byte value)
-        {
-            return new RegisterByte(value);
-        }
+    public static implicit operator byte(RegisterByte register)
+    {
+        return register.Value;
+    }
 
-        public static implicit operator byte(RegisterByte register)
-        {
-            return register.Value;
-        }
+    public bool this[int bitIndex]
+    {
+        get => Value.GetBit(bitIndex);
 
-        public bool this[int bitIndex]
-        {
-            get => Value.GetBit(bitIndex);
+        set => Value = Value.SetBit(bitIndex, value);
+    }
 
-            set => Value = Value.SetBit(bitIndex, value);
-        }
-
-        public override string ToString()
-        {
-            return $"Value: {Convert.ToString(Value, 2)}";
-        }
+    public override string ToString()
+    {
+        return $"Value: {Convert.ToString(Value, 2)}";
     }
 }
