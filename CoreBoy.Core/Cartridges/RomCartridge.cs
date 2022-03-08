@@ -23,7 +23,7 @@ public class RomCartridge : ICartridge
         if (data.Length != header.RomSize.Total)
             throw new ArgumentOutOfRangeException(nameof(data), "Cartridge data has invalid length");
         if (header.HeaderChecksum != header.CalculatedHeaderChecksum)
-            log.LogWarning("Cartridge header has invalid checksum");
+            throw new ArgumentOutOfRangeException(nameof(header.HeaderChecksum), "Cartridge header has invalid checksum");
 
         rom = data;
 
