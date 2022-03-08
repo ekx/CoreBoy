@@ -36,7 +36,7 @@ public class Emulator : IDisposable
     public void Run()
     {
         var bootRomPath = Path.Combine("Resources", "boot.rom");
-        var cartridgePath = Path.Combine("Resources", "opus5.gb");
+        var cartridgePath = Path.Combine("Resources", "mario.gb");
 
         gameBoy.LoadBootRom(bootRomPath);
         gameBoy.LoadCartridge(cartridgePath);

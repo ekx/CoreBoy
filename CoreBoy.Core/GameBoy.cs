@@ -78,12 +78,12 @@ public class GameBoy
             case CartridgeType.ROM:
                 cartridge = new RomCartridge(loggerFactory.CreateLogger<RomCartridge>(), data);
                 break;
-            /*case RomType.ROM_MBC1:
-            case RomType.ROM_MBC1_RAM:
-            case RomType.ROM_MBC1_RAM_BATT:
-                cartridge = new MBC1(fileData, romType, romSize, romBanks);
+            case CartridgeType.ROM_MBC1:
+            case CartridgeType.ROM_MBC1_RAM:
+            case CartridgeType.ROM_MBC1_RAM_BATT:
+                cartridge = new Mbc1Cartridge(loggerFactory.CreateLogger<RomCartridge>(), data);
                 break;
-            case RomType.ROM_MBC2:
+            /*case RomType.ROM_MBC2:
             case RomType.ROM_MBC2_BATTERY:
                 cartridge = new MBC2(fileData, romType, romSize, romBanks);
                 break;

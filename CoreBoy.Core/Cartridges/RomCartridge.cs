@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using CoreBoy.Core.Cartridges.Interfaces;
 using CoreBoy.Core.Cartridges.State;
+using CoreBoy.Core.Cartridges.Utils;
 
 namespace CoreBoy.Core.Cartridges;
 
@@ -17,8 +18,12 @@ public class RomCartridge : ICartridge
     {
         this.log = log;
 
-        if (data.Length != 32768)
+        var header = new CartridgeHeader(data);
+        
+        if (data.Length != header.RomSize.Total)
             throw new ArgumentOutOfRangeException(nameof(data), "Cartridge data has invalid length");
+        if (header.HeaderChecksum != header.CalculatedHeaderChecksum)
+            log.LogWarning("Cartridge header has invalid checksum");
 
         rom = data;
 

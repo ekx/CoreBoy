@@ -257,7 +257,12 @@ public sealed class Ppu : IPpu
 
     private void RenderWindow()
     {
-            
+        var x = State.Io[GraphicsIo.WX].Value;
+        var y = (byte)((State.Io[GraphicsIo.LY].Value + State.Io[GraphicsIo.WY].Value) & 0xFF);
+
+        var tileMapOffset = State.Io[GraphicsIo.LCDC][LcdControl.WindowTileMap] ? (ushort)0x9C00 : (ushort)0x9800;
+
+        RenderToFramebuffer(x, y, tileMapOffset);
     }
 
     private void RenderSprites()
