@@ -38,11 +38,11 @@ public sealed class Ppu : IPpu
             {
                 if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode == ScreenMode.TransferringData)
                 {
-                    log.LogWarning($"Read from Graphics RAM while inaccessible. Address: {address:X4}");
+                    log.LogWarning("Read from Graphics RAM while inaccessible. Address: {Address:X4}", address);
                     return 0xFF;
                 }
 
-                //log.LogDebug($"Read from Graphics RAM. Address: {address:X4}, Value {State.Vram[address & 0x1FFF]:X2}");
+                //log.LogDebug("Read from Graphics RAM. Address: {Address:X4}, Value {Value:X2}", address, State.Vram[address & 0x1FFF]);
                 return State.Vram[address & 0x1FFF];
             }
             // [FE00-FE9F] Object Attribute Memory
@@ -50,22 +50,22 @@ public sealed class Ppu : IPpu
             {
                 if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode >= ScreenMode.AccessingOam)
                 {
-                    log.LogWarning($"Read from OAM while inaccessible. Address: {address:X4}");
+                    log.LogWarning("Read from OAM while inaccessible. Address: {Address:X4}", address);
                     return 0xFF;
                 }
                     
-                //log.LogDebug($"Read from OAM. Address: {address:X4}, Value {State.Oam[address & 0xFF]:X2}");
+                //log.LogDebug("Read from OAM. Address: {Address:X4}, Value {Value:X2}", address, State.Oam[address & 0xFF]);
                 return State.Oam[address & 0xFF];
             }
             // [FF40-FF4B] Graphics IO
             else if (address is >= 0xFF40 and < 0xFF4C)
             {
-                //log.LogDebug($"Read from Graphics IO. Address: {address:X4}, Value {State.IO[address & 0xF]:X2}");
+                //log.LogDebug("Read from Graphics IO. Address: {Address:X4}, Value {Value:X2}", address, State.Io[address & 0xF]);
                 return State.Io[address & 0xF].Value;
             }
             else
             {
-                log.LogError($"Read from non PPU memory space. Address: {address:X4}");
+                log.LogError("Read from non PPU memory space. Address: {Address:X4}", address);
                 return 0x00;
             }
         }
@@ -77,11 +77,11 @@ public sealed class Ppu : IPpu
             {
                 if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode == ScreenMode.TransferringData)
                 {
-                    log.LogWarning($"Write to Graphics RAM while inaccessible. Address: {address:X4}, Value: {value:X2}");
+                    log.LogWarning("Write to Graphics RAM while inaccessible. Address: {Address:X4}, Value: {Value:X2}", address, value);
                     return;
                 }
 
-                //log.LogDebug($"Write to Graphics RAM. Address: {address:X4}, Value: {value:X2}");
+                //log.LogDebug("Write to Graphics RAM. Address: {Address:X4}, Value: {Value:X2}", address, value);
                 State.Vram[address & 0x1FFF] = value;
             }
             // [FE00-FE9F] Object Attribute Memory
@@ -89,22 +89,22 @@ public sealed class Ppu : IPpu
             {
                 if (State.Io[GraphicsIo.LCDC][LcdControl.LcdPower] && ScreenMode >= ScreenMode.AccessingOam)
                 {
-                    log.LogWarning($"Write to OAM while inaccessible. Address: {address:X4}, Value: {value:X2}");
+                    log.LogWarning("Write to OAM while inaccessible. Address: {Address:X4}, Value: {Value:X2}", address, value);
                     return;
                 }
 
-                //log.LogDebug($"Write to OAM. Address: {address:X4}, Value: {value:X2}");
+                //log.LogDebug("Write to OAM. Address: {Address:X4}, Value: {Value:X2}", address, value);
                 State.Oam[address & 0xFF] = value;
             }
             // [FF40-FF4B] Graphics IO
             else if (address is >= 0xFF40 and < 0xFF4C)
             {
-                //log.LogDebug($"Write to Graphics IO. Address: {address:X4}, Value: {value:X2}");
+                //log.LogDebug("Write to Graphics IO. Address: {Address:X4}, Value: {Value:X2}", address, value);
                 State.Io[address & 0xF].Value = value;
             }
             else
             {
-                log.LogError($"Write to non PPU memory space. Address: {address:X4}, Value: {value:X2}");
+                log.LogError("Write to non PPU memory space. Address: {Address:X4}, Value: {Value:X2}", address, value);
             }
         }
     }

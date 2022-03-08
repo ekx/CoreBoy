@@ -51,7 +51,7 @@ public class GameBoy
             }
             catch (MissingOpcodeException e)
             {
-                log.LogError(e.Message);
+                log.LogError("{Message}", e.Message);
                 shouldStop = true;
             }
         }
@@ -93,7 +93,7 @@ public class GameBoy
                 cartridge = new MBC3(fileData, romType, romSize, romBanks);
                 break*/
             default:
-                log.LogError($"Cartridge type not emulated: {(CartridgeType)data[0x0147]}");
+                log.LogError("Cartridge type not emulated: {CartridgeType}", (CartridgeType)data[0x0147]);
                 break;
         }
 

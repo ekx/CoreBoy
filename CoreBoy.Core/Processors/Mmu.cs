@@ -51,13 +51,13 @@ public sealed class Mmu : IMmu
             // [0000-00FF] Boot ROM
             if (address < 0x0100 && !State.Io[MmuIo.BOOT][Boot.BootOff])
             {
-                //log.LogDebug($"Read from Boot ROM. Address: {address:X4}, Value: {this.bootRom[address]:X2}");
-                return this.bootRom[address];
+                //log.LogDebug("Read from Boot ROM. Address: {Address:X4}, Value: {Value:X2}", address, bootRom[address]);
+                return bootRom[address];
             }
             // [0000-7FFF] Cartridge ROM
             else if (address < 0x8000)
             {
-                return this.cartridge[address];
+                return cartridge[address];
             }
             // [8000-9FFF] Graphics RAM
             else if (address < 0xA000)
@@ -67,12 +67,12 @@ public sealed class Mmu : IMmu
             // [A000-BFFF] Cartridge RAM
             else if (address < 0xC000)
             {
-                return this.cartridge[address];
+                return cartridge[address];
             }
             // [C000-FDFF] Working RAM + Shadow
             else if (address < 0xFE00)
             {
-                //log.LogDebug($"Read from Working RAM. Address: {address:X4}, Value: {State.Wram[address & 0x1FFF]:X2}");
+                //log.LogDebug("Read from Working RAM. Address: {Address:X4}, Value: {Value:X2}", address, State.Wram[address & 0x1FFF]);
                 return State.Wram[address & 0x1FFF];
             }
             // [FE00-FE9F] Object Attribute Memory
@@ -83,7 +83,7 @@ public sealed class Mmu : IMmu
             // [FEA0-FEFF] Unusable memory
             else if (address < 0xFF00)
             {
-                log.LogWarning($"Read from unsuable memory. Address: {address:X4}");
+                log.LogWarning("Read from unusable memory. Address: {Address:X4}", address);
                 return 0x00;
             }
             // [FF00-FF7F] Memory-mapped I/O
@@ -91,7 +91,7 @@ public sealed class Mmu : IMmu
             {
                 if (address is >= 0xFF10 and <= 0xFF3F)
                 {
-                    log.LogError($"SPU read not implemented. Address: {address:X4}");
+                    log.LogError("SPU read not implemented. Address: {Address:X4}", address);
                     return 0x00;
                 }
                 else if (address is >= 0xFF40 and <= 0xFF4B)
@@ -135,7 +135,7 @@ public sealed class Mmu : IMmu
             // [C000-FDFF] Working RAM + Shadow
             else if (address < 0xFE00)
             {
-                //log.LogDebug($"Write to Working RAM. Address: {address:X4}, Value: {value:X2}");
+                //log.LogDebug("Write to Working RAM. Address: {Address:X4}, Value: {Value:X2}", address, value);
                 State.Wram[address & 0x1FFF] = value;
             }
             // [FE00-FE9F] Object Attribute Memory
@@ -146,14 +146,14 @@ public sealed class Mmu : IMmu
             // [FEA0-FEFF] Unusable memory
             else if (address < 0xFF00)
             {
-                log.LogWarning($"Write to unsuable memory. Address: {address:X4}, Value: {value:X2}");
+                log.LogWarning("Write to unusable memory. Address: {Address:X4}, Value: {Value:X2}", address, value);
             }
             // [FF00-FF7F] Memory-mapped I/O
             else if (address < 0xFF80)
             {
                 if (address is >= 0xFF11 and <= 0xFF3F)
                 {
-                    log.LogError($"SPU write not implemented. Address: {address:X4}, Value: {value:X2}");
+                    log.LogError("SPU write not implemented. Address: {Address:X4}, Value: {Value:X2}", address, value);
                 }
                 else if (address is >= 0xFF40 and <= 0xFF4B)
                 {
