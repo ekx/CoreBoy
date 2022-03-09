@@ -84,7 +84,7 @@ public sealed class Mmu : IMmu
             else if (address < 0xFF00)
             {
                 log.LogWarning("Read from unusable memory. Address: {Address:X4}", address);
-                return 0x00;
+                return 0xFF;
             }
             // [FF00-FF7F] Memory-mapped I/O
             else if (address < 0xFF80)
@@ -92,7 +92,7 @@ public sealed class Mmu : IMmu
                 if (address is >= 0xFF10 and <= 0xFF3F)
                 {
                     log.LogError("SPU read not implemented. Address: {Address:X4}", address);
-                    return 0x00;
+                    return 0xFF;
                 }
                 else if (address is >= 0xFF40 and <= 0xFF4B)
                 {

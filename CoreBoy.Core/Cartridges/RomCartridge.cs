@@ -44,7 +44,7 @@ public class RomCartridge : ICartridge
             else if (address is >= 0xA000 and < 0xC000)
             {
                 log.LogWarning("Read from nonexistent cartridge RAM. Address: {Address:X4}", address);
-                return 0x00;
+                return 0xFF;
             }
             else
             {
